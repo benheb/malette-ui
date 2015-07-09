@@ -1,1 +1,1 @@
-this.map=L.map("map").setView([38.891,-20],3),L.esri.basemapLayer("Gray").addTo(this.map);
+this.map=L.map("map").setView([32.891,-20],3),L.esri.basemapLayer("Gray").addTo(this.map);var geojsonMarkerOptions={radius:4,fillColor:"#256e9d",color:"#FFF",weight:.8,opacity:1,fillOpacity:.7},layer=L.esri.featureLayer("http://services1.arcgis.com/szcgiQwor8m0ZTum/arcgis/rest/services/Earthquakes/FeatureServer/0",{pointToLayer:function(r,e){return L.circleMarker(e,geojsonMarkerOptions)}}).addTo(this.map);
