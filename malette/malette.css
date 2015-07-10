@@ -1,0 +1,11 @@
+#malette {
+  position: absolute;
+  z-index: 100;
+  right: 10px;
+  top: 10px;
+  background: #FFF;
+  min-height: 110px;
+  width:300px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+  border-radius: 4px;
+}
