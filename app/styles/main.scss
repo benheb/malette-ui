@@ -1,5 +1,12 @@
 $icon-font-path: '../fonts/';
 
+$header-background: #8bacbd;
+$header-color: #FFF;
+
+$second-color:#eaeaea;
+$accent-color:#fa9581;
+$header-text-color:#4C495A;
+
 // bower:scss
 @import "bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 // endbower
@@ -18,19 +25,25 @@ body,html {
   padding-bottom: 0px;
   height:100%;
   width:100%;
+  background:#FFF;
   font-family: 'Varela', sans-serif;
 }
 
 .navbar {
   margin-bottom:0px;
-  background:#c0b3bc;
+  //background:#779ECB;
+  background:$header-background;
   border:none;
   border-radius:0;
   height:10px;
   color:#FFF;
   text-transform: uppercase;
+  -webkit-animation: fadeIn .25s linear;
+  animation: fadeIn .25s linear;
+  -webkit-animation-fill-mode: forwards;
+  animation-fill-mode: forwards;
   .navbar-brand, li, a {
-    color:#FFF !important;
+    color:$header-color !important;
   }
 }
 
@@ -46,8 +59,9 @@ body,html {
 
 #header {
   padding-bottom:3em;
-  background:#c0b3bc;
-  color:#FFF;
+  //background:#779ECB;
+  background:$header-background;
+  color:$header-color;
   text-transform: uppercase;
   opacity: 0;
   -webkit-animation: fadeIn .25s linear;
@@ -78,7 +92,20 @@ body,html {
 
 #map {
   width:100%;
-  height:400px;
+  height:380px;
+}
+
+.section-header {
+  background:$second-color;
+  color:$header-text-color;
+  padding-bottom:5px;
+  margin-bottom:10px;
+}
+
+#getting-started {
+  background:#FDFDFD;
+  color:#444;
+  min-height: 300px;
 }
 
 
