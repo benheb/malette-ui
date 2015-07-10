@@ -93,6 +93,15 @@ gulp.task('extras', () => {
   }).pipe(gulp.dest('dist'));
 });
 
+gulp.task('malette', () => {
+  return gulp.src([
+    'app/malette/**/*.js',
+    'app/malette/**/*.css'
+  ], {
+    dot: true
+  }).pipe(gulp.dest('dist/malette'));
+});
+
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('serve', ['styles', 'fonts'], () => {
@@ -164,7 +173,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['html', 'images', 'fonts', 'extras', 'malette'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
