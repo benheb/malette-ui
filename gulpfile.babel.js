@@ -29,6 +29,11 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
+gulp.task('css', () => {
+  return gulp.src('app/malette/*.css')
+    .pipe(reload({stream: true}));
+});
+
 function lint(files, options) {
   return () => {
     return gulp.src(files)
@@ -120,12 +125,13 @@ gulp.task('serve', ['styles', 'fonts'], () => {
     'app/*.html',
     'app/scripts/**/*.js',
     'app/malette/**/*.js',
-    'app/malette/**/*.css',
+    //'app/malette/**/*.css',
     'app/images/**/*',
     '.tmp/fonts/**/*'
   ]).on('change', reload);
 
   gulp.watch('app/styles/**/*.scss', ['styles']);
+  gulp.watch('app/malette/**/*.css', ['css']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
 });
