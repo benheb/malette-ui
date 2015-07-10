@@ -52,6 +52,11 @@
   text-align: center;
   padding-top: 8px;
   padding-bottom: 8px;
+  cursor: pointer;
+}
+
+.malette-tab:hover {
+  background:#F9F9F9;
 }
 
 .malette-tab-selected {
