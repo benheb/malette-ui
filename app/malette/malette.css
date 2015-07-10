@@ -1,11 +1,116 @@
 #malette {
   position: absolute;
-  z-index: 100;
+  z-index: 1000;
+  pointer-events:auto;
   right: 10px;
   top: 10px;
   background: #FFF;
   min-height: 110px;
   width:300px;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.11);
   border-radius: 4px;
+}
+
+#malette-header {
+  padding: 5px;
+  background: #EEE;
+  text-transform: uppercase;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1em;
+  color: rgba(172, 172, 172, 0.7);
+  text-shadow: 1px 1px 1px #EEE, 0 0 0 #EEE, 1px 2px 4px #EEE;
+}
+
+/* Don't show shadows when selecting text */
+::-moz-selection { background: #5af; color: #fff; text-shadow: none; }
+::selection { background: #5af; color: #fff; text-shadow: none; }
+
+#malette-content {
+  width: 250px;
+  margin-left: 50px;
+  height: 220px;
+  position: absolute;
+  margin-top: 22px;
+  padding:10px;
+  padding-left:12px;
+}
+
+#malette-tab-region {
+  width: 50px;
+  border-right: 1px solid #EEE;
+  min-height: 220px;
+  position: relative;
+}
+
+.malette-tab {
+  padding:4px;
+  border-bottom: 1px solid #EEE;
+  text-align: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.malette-tab-selected {
+  width: 51px;
+  background: #FFF;
+}
+
+.malette-option-toggle {
+  float: left;
+  border: 1px solid #EEE;
+  border-radius: 1px;
+  padding:5px;
+  font-size: 0.8em;
+  margin-right: 5px;
+  padding-top:2px;
+  padding-bottom: 2px;
+}
+
+.malette-option-toggle-selected {
+  background: #EEE;
+}
+
+#malette-color-palette {
+  width:100%;
+  margin:auto;
+  margin-top: 5px;
+  margin-top: 24px;
+  overflow: hidden;
+}
+
+.malette-color-swatch {
+  width: 26px;
+  height: 18px;
+  border: 1px solid #EEE;
+  float: left;
+  margin: 1px;
+}
+
+#malette-selected-color {
+  font-size: 0.8em;
+  margin-top: 2px;
+  margin-bottom: 4px;
+  width: 98%;
+  background: #F8F8F8;
+  padding: 5px;
+  position: relative;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.malette-color-swatch-selected {
+  width: 26px;
+  height: 18px;
+  border: 1px solid #EEE;
+  margin: 1px;
+  position: absolute;
+  right: 3px;
+  top: 2px;
+}
+
+.malette-color-swatch:hover {
+  cursor: pointer;
+  border:1px solid #CCC;
 }

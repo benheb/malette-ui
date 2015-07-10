@@ -21,3 +21,10 @@ var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/service
 
 
 var malette = new Malette('map', {});
+
+
+malette.on('style-change', function( style ){
+  console.log('style', style);
+  geojsonMarkerOptions.fillColor = style.selectedColor;
+  layer.setStyle(geojsonMarkerOptions);
+});
