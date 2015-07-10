@@ -9,6 +9,8 @@
     this.width = options.width || 239;
     this.height = options.height || 'auto';
     this.layer = options.layer || null;
+    this.format = options.format || 'esri'; 
+    this.exportStyle = options.style || {};
     this.style = {};
     this._handlers = {};
     this.selectedColor = '#CCC';

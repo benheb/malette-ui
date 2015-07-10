@@ -21,7 +21,10 @@ var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/service
 }).addTo(this.map);
 
 
-var malette = new Malette('map', {});
+var malette = new Malette('map', {
+  style: style,
+  format: 'esri-leaflet'
+});
 
 
 malette.on('style-change', function( style ){
