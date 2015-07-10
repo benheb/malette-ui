@@ -1,11 +1,12 @@
 $icon-font-path: '../fonts/';
 
-$header-background: #8bacbd;
+$primary-color: #8bacbd;
 $header-color: #FFF;
 
 $second-color:#eaeaea;
+$third-color: rgba(219, 218, 214, 0.1);
 $accent-color:#fa9581;
-$header-text-color:#4C495A;
+$text-color:#4C495A;
 
 // bower:scss
 @import "bower_components/bootstrap-sass/assets/stylesheets/_bootstrap.scss";
@@ -26,13 +27,18 @@ body,html {
   height:100%;
   width:100%;
   background:#FFF;
+  color:$text-color;
   font-family: 'Varela', sans-serif;
+}
+
+.row-break {
+  margin-bottom: 50px;
 }
 
 .navbar {
   margin-bottom:0px;
   //background:#779ECB;
-  background:$header-background;
+  background:$primary-color;
   border:none;
   border-radius:0;
   height:10px;
@@ -60,7 +66,7 @@ body,html {
 #header {
   padding-bottom:3em;
   //background:#779ECB;
-  background:$header-background;
+  background:$primary-color;
   color:$header-color;
   text-transform: uppercase;
   opacity: 0;
@@ -95,17 +101,86 @@ body,html {
   height:380px;
 }
 
+.section {
+  margin-bottom:50px;
+}
+
 .section-header {
   background:$second-color;
-  color:$header-text-color;
+  color:$text-color;
   padding-bottom:5px;
-  margin-bottom:10px;
+  margin-bottom:50px;
+}
+
+.section-header-light {
+  background:#FFF;
+  color:$text-color;
+  padding-bottom:5px;
+  margin-bottom:5px; 
+}
+
+.line {
+  border-bottom:1px solid $second-color;
 }
 
 #getting-started {
   background:#FDFDFD;
   color:#444;
   min-height: 300px;
+}
+
+.blurb {
+  margin-bottom: 15px;
+  display: block;
+  font-size: 1.7rem;
+}
+
+.link {
+  background-color: $third-color;
+  padding: 15px;
+  font-size: 1.5em;
+  width:100%;
+  color:$accent-color;
+  border: 5px solid rgba(219, 218, 214, 0.3);// dashed $accent-color;
+}
+
+code {
+  font-family: 'Menlo', 'Source Code Pro', monospace;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  line-height: 1.5rem;
+  padding:1.4em;
+  padding-left:1em;
+  width: 100%;
+  margin: 0 .125em;
+  background-color: $third-color;
+  border: 1px solid #EFF0E9;
+  color:#444;
+  display: inline-block;
+  margin-bottom:20px;
+}
+
+.custom-btn {
+  background-color:$primary-color;
+  text-align: center;
+  padding:15px;
+  color:#FFF;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 1.8rem;
+  margin-top:-10px;
+  -webkit-transition: background-color 200ms ease;
+  -moz-transition: background-color 200ms eas;
+  -o-transition: background-color 200ms ease;
+  transition: background-color 200ms ease;
+  &:hover {
+    cursor: pointer;
+    background-color:#748f9c;
+  }
+}
+
+#example-button {
+
 }
 
 
