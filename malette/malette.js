@@ -4,17 +4,39 @@
   var Malette = function Malette( container, options ) {
     console.log('init Malette, options: ', options);
 
+    //store options 
     this.options = options;
-    this.container = container;
+
+    //UI defaults 
     this.width = options.width || 239;
     this.height = options.height || 'auto';
-    this.layer = options.layer || null;
-    this.format = options.format || 'esri'; 
-    this.exportStyle = options.style || {};
-    this.style = {};
+    this.container = container;
     this._handlers = {};
-    this.selectedColor = '#CCC';
+        
+    this.layer = options.layer || null;
 
+    //style params 
+    this.format = options.format || 'esri-json';
+    this.exportFormat = options.format || 'esri-json';
+
+    if ( this.format === 'esri-json' ) {
+      if ( options.style ) {
+        
+        this.style = options.style || {};
+        this.fillOpacity = this.style.symbol.color[3];
+        this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc
+
+      } else {
+        //TODO 
+        //create default esri json 
+      }
+    } else {
+      if ( options.style ) {
+        this._toEsriJson();
+      }
+    }
+
+    //initialize 
     this._buildUI();
 
   };
@@ -107,7 +129,7 @@
 
     var selectedColor = this._createElement('div', colorPalette, 'malette-selected-color', 'Selected color', '');
     swatch = this._createElement('span', selectedColor, 'malette-selected-swatch', '', 'malette-color-swatch-selected');
-    swatch.style.backgroundColor = this.selectedColor;
+    swatch.style.backgroundColor = this.style.symbol.color;
 
     colors.forEach(function(color, i) {
       swatch = document.createElement( 'div' );
@@ -136,7 +158,7 @@
       this._createElement('div', el, 'malette-graduated-size-option', 'Graduated', 'malette-option-toggle disabled');
     }
 
-    var size = this.selectedSize || 8; 
+    var size = this.style.symbol.size || 8; 
 
     var slider = document.createElement( 'input' );
     slider.type = 'range';
@@ -171,7 +193,7 @@
 
     el.innerHTML = '';
 
-    var width = this.selectedStrokeWidth || 0.5; 
+    var width = this.style.symbol.outline.width || 0.5; 
 
     var slider = document.createElement( 'input' );
     slider.type = 'range';
@@ -207,7 +229,7 @@
 
     el.innerHTML = '';
 
-    var opacity = this.selectedOpacity || 0.7; 
+    var opacity = (this.fillOpacity / 255) || 0.7; 
 
     var slider = document.createElement( 'input' );
     slider.type = 'range';
@@ -244,7 +266,7 @@
     el.innerHTML = html;
     document.getElementById( id ).className = className;
 
-    return el; 
+    return el;
   }
 
 
@@ -305,9 +327,9 @@
 
   Malette.prototype.setSelectedColor = function(color) {
 
-    this.selectedColor = color;
+    this.style.symbol.color = color;
     var swatch = document.getElementById( 'malette-selected-swatch' );
-    swatch.style.backgroundColor = this.selectedColor;
+    swatch.style.backgroundColor = this.style.symbol.color;
 
     this._updateStyle();
   }
@@ -315,7 +337,7 @@
 
 
   Malette.prototype.setSelectedSize = function(size) {
-    this.selectedSize = parseInt(size);
+    this.style.symbol.size = parseInt(size);
     var el = document.getElementById( 'malette-size-number' );
     el.innerHTML = 'Radius: ' + size + 'px';
     this._updateStyle();
@@ -324,7 +346,7 @@
 
 
   Malette.prototype.setStrokeWidth = function(width) {
-    this.selectedStrokeWidth = parseFloat(width);
+    this.style.symbol.outline.width = parseFloat(width);
     var el = document.getElementById( 'malette-stroke-width' );
     el.innerHTML = 'Stroke width: ' + width + 'px';
     this._updateStyle();
@@ -332,11 +354,75 @@
 
 
   Malette.prototype.setOpacity = function(opacity) {
-    this.selectedOpacity = parseFloat(opacity);
+    this.fillOpacity = parseFloat(opacity) * 255;
     var el = document.getElementById( 'malette-opacity-number' );
     el.innerHTML = 'Opacity: ' + (opacity*100) + '%';
     this._updateStyle();
   }
+
+
+
+  //helpers 
+  Malette.prototype._dojoColorToRgba = function(c) {
+    var color = 'rgba('+c[0]+','+c[1]+','+c[2]+','+c[3]+')';
+    return color;
+  }
+
+
+  Malette.prototype._rgbaToDojoColor = function(c, opacity) {
+    var color;
+    if ( Array.isArray(c) ) {
+      color = c;
+      color[3] = opacity;
+      return color;
+    } else {
+      var color = c.split(',');
+      return [ parseInt(color[0].replace(/[^0-9]/g, '')), parseInt(color[1]), parseInt(color[2]), opacity ];
+    }
+  }
+
+
+  /*
+  * Convert various style inputs to esri-json which is used in Malette 
+  * 
+  *
+  */ 
+  Malette.prototype._toEsriJson = function() {
+
+    if ( this.format === 'css' ) {
+      this.style = {
+        type: 'simple',
+        symbol: {}
+      };
+      this.style.symbol.color = (this.options.style.fillColor) ? this.options.style.fillColor : 'rgba(202,58,45,130)';
+      this.style.symbol.size = ( this.options.style.radius ) ? this.options.style.radius : 8;
+      this.style.symbol.outline = {};
+      this.style.symbol.outline.width = this.options.style.weight || 1; 
+      this.style.symbol.outline.color = [ this.options.style.color ] || 'rgba(255,255,255,255';
+      this.fillOpacity = ( this.options.style.fillOpacity ) ? (this.options.style.fillOpacity * 255) : 255;
+    }
+
+  }
+
+
+  /*
+  * Convert esri-json to CSS 
+  * 
+  *
+  */ 
+  Malette.prototype._toCss = function(callback) {
+
+    var css = {};
+    css.fillColor = this.style.symbol.color;
+    css.weight = this.style.symbol.outline.width;
+    css.color = this.style.symbol.outline.color;
+    css.radius = this.style.symbol.size;
+    css.fillOpacity = this.fillOpacity / 255;
+
+    callback(css);
+    
+  }
+
 
 
   /*
@@ -345,18 +431,30 @@
   *
   */
   Malette.prototype._updateStyle = function() {
+    var self = this; 
 
-    this.style = this.style || {};
+    if ( this.exportFormat === 'esri-json' ) {
 
-    this.style.selectedColor = this.selectedColor;
-    this.style.selectedSize = this.selectedSize;
-    this.style.selectedStrokeWidth = this.selectedStrokeWidth;
-    this.style.selectedOpacity = this.selectedOpacity;
-    console.log('this.style', this.style);
+      console.log('this.style.symbol.color', this.style.symbol.color);
+      console.log('fillOpacity', this.fillOpacity);
 
-    this.emit( 'style-change', this.style );
+      this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
+
+      console.log('emit --->>>', this.style);
+      this.emit( 'style-change', this.style );
+    } else {
+
+      if ( this.exportFormat === 'css' ) {
+        this._toCss(function(css) {
+          self.emit( 'style-change', css );
+        });
+      }
+
+    }
 
   }
+
+
 
 
 
