@@ -20,20 +20,16 @@ var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/service
   }
 }).addTo(this.map);
 
+console.log('layer', layer);
 
 var malette = new Malette('map', {
   style: style,
-  format: 'esri-leaflet'
+  format: 'css',
+  exportFormat: 'css'
 });
 
 
 malette.on('style-change', function( style ){
-  //console.log('style', style);
-
-  style.fillColor = style.selectedColor;
-  style.radius = style.selectedSize || 4;
-  style.weight = style.selectedStrokeWidth || 0.5;
-  style.fillOpacity = style.selectedOpacity || 0.7;
-
+  console.log('main map LISTENER style', style);
   layer.setStyle(style);
 });

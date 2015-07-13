@@ -160,6 +160,11 @@ code {
   margin-bottom:20px;
 }
 
+pre {
+  border:none;
+  background:none;
+}
+
 .custom-btn {
   background-color:$primary-color;
   text-align: center;
@@ -179,10 +184,38 @@ code {
   }
 }
 
-#example-button {
-
+#examples {
+  margin-top:25px;
 }
 
+#examples-content {
+  background-color: rgba(219, 218, 214, 0.1);
+  padding: 15px;
+  border-top: 5px solid rgba(219, 218, 214, 0.3);
+}
+
+#examples-list {
+  background-color: rgba(219, 218, 214, 0.1);
+  padding: 15px;
+  border: 5px solid rgba(219, 218, 214, 0.3);
+  ul {
+    padding-left:16px;
+    margin-left:0px;
+  }
+  li {
+    list-style: none;
+    margin-bottom:4px;
+  }
+  .active-example {
+    font-size: 0.8em;
+    margin-left: -16px;
+  }
+}
+
+#esri-map {
+  height:500px;
+  position: relative;
+}
 
 //animations
 @-webkit-keyframes fadeIn {

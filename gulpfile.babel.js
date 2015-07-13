@@ -107,6 +107,19 @@ gulp.task('malette', () => {
   }).pipe(gulp.dest('dist/malette'));
 });
 
+gulp.task('examples', ['styles'], () => {
+  const assets = $.useref.assets({searchPath: ['.tmp', 'app/examples', '.']});
+
+  return gulp.src('app/examples/*.html')
+    .pipe(assets)
+    .pipe($.if('*.js', $.uglify()))
+    .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
+    .pipe(assets.restore())
+    .pipe($.useref())
+    .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
+    .pipe(gulp.dest('dist/examples'));
+});
+
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('serve', ['styles', 'fonts'], () => {
@@ -125,7 +138,7 @@ gulp.task('serve', ['styles', 'fonts'], () => {
     'app/*.html',
     'app/scripts/**/*.js',
     'app/malette/**/*.js',
-    //'app/malette/**/*.css',
+    'app/examples/*.html',
     'app/images/**/*',
     '.tmp/fonts/**/*'
   ]).on('change', reload);
@@ -179,7 +192,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'extras', 'malette'], () => {
+gulp.task('build', ['html', 'images', 'fonts', 'extras', 'malette', 'examples'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 
