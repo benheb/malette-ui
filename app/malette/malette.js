@@ -40,9 +40,15 @@
       }
     }
 
+    //optional UI elements 
     //initialize 
     this._buildUI();
 
+    console.log('opts', options);
+    if ( options.exportStyle === true ) {
+      this._addExporter();
+    }
+    
   };
 
 
@@ -98,6 +104,16 @@
       }
     }
     
+  }
+
+
+
+
+  Malette.prototype._addExporter = function() {
+    var container = document.getElementById('malette-header');
+    var el = this._createElement('div', container, 'malette-export-toggle-container', 'Export style', '');
+    var toggle = this._createElement('input', el, 'malette-export-toggle', '', '');
+    toggle.type = 'checkbox';
   }
 
 
