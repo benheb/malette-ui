@@ -21,7 +21,7 @@
 
     //style params 
     this.format = options.format || 'esri-json';
-    this.exportFormat = options.format || 'esri-json';
+    this.exportFormat = options.exportFormat || 'esri-json';
 
     if ( this.format === 'esri-json' ) {
       if ( options.style ) {

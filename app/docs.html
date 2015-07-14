@@ -42,8 +42,8 @@
         <span class="pull-right">
           <ul class="nav navbar-nav">
             <li><a href="#getting-started">Getting Started</a></li>
-            <li><a href="#">Examples</a></li>
-            <li><a href="">docs</a></li>
+            <li><a href="examples">Examples</a></li>
+            <li><a href="docs.html">docs</a></li>
             <li><a href="https://github.com/benheb/malette">Github</a></li>
           </div>
         </span>
@@ -67,37 +67,49 @@
             <code>
               var malette = new Malette(container, options);
             </code>
-            <h2>Required</h2>
-            <table class="table">
-              <thead>
-                <th>Param</th>
-                <th>Description</th>
-              </thead>
-              <tbody>
-                <tr>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
             <h2>Options</h2>
             <table class="table">
               <thead>
                 <th>Option</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+                <th>Example(s)</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>style</td>
+                  <td>{object}</td>
+                  <td>{}</td>
+                  <td>Default style object for Malette to manipulate; returns updated style object.</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>format</td>
+                  <td>{string}</td>
+                  <td>esri-json</td>
+                  <td>This tells Malette what style format is being fed to the styler.</td>
+                  <td>esri-json, css</td>
+                </tr>
+                <tr>
+                  <td>exportFormat</td>
+                  <td>{string}</td>
+                  <td>esri-json</td>
+                  <td>This tells Malette what type of style object to produce.</td>
+                  <td>esri-json, css</td>
+                </tr>
+              </tbody>
+            </table>
+            <h2>Events</h2>
+            <table class="table">
+              <thead>
+                <th>Name</th>
                 <th>Description</th>
               </thead>
               <tbody>
                 <tr>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td></td>
+                  <td>style-change</td>
+                  <td>Fires when any change is made to the Malette style object.</td>
                 </tr>
               </tbody>
             </table>
@@ -148,8 +160,5 @@
 
     <script src="malette/malette.js"></script>
 
-    <!-- build:js scripts/main.js -->
-    <script src="scripts/main.js"></script>
-    <!-- endbuild -->
   </body>
 </html>
