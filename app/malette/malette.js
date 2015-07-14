@@ -28,7 +28,8 @@
         
         this.style = options.style || {};
         this.fillOpacity = this.style.symbol.color[3];
-        this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc
+        this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc\
+        this.style.symbol.outline.color = this._dojoColorToRgba( this.style.symbol.outline.color );
 
       } else {
         //TODO 
@@ -72,7 +73,7 @@
     header.innerHTML = 'Malette';
 
     this._addTabs(innerContainer);
-    this._constructSingleColorPalette(content);
+    this._constructColorRegion(content);
 
   }
 
@@ -118,14 +119,7 @@
 
 
 
-  /*
-  * Color tab UI 
-  *
-  *
-  */
-  Malette.prototype._constructSingleColorPalette = function(el) {
-
-    el.innerHTML = '';
+  Malette.prototype._addColors = function(el, selectedColor) {
     var swatch;
     var colors = [
       'rgb(255,255,255)','rgb(240,240,240)','rgb(217,217,217)','rgb(189,189,189)','rgb(150,150,150)','rgb(115,115,115)','rgb(82,82,82)','rgb(37,37,37)',
@@ -137,19 +131,11 @@
       'rgb(247,252,253)','rgb(229,245,249)','rgb(204,236,230)','rgb(153,216,201)','rgb(102,194,164)','rgb(65,174,118)','rgb(35,139,69)','rgb(0,88,36)'
     ];
 
-    this._createElement('div', el, 'malette-single-color-option', 'Single', 'malette-option-toggle malette-option-toggle-selected');
-    
-    if ( this.layer ) {
-      this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle');
-    } else {
-      this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle disabled');
-    }
-
     var colorPalette = this._createElement('div', el, 'malette-color-palette', '', '');
 
-    var selectedColor = this._createElement('div', colorPalette, 'malette-selected-color', 'Selected color', '');
-    swatch = this._createElement('span', selectedColor, 'malette-selected-swatch', '', 'malette-color-swatch-selected');
-    swatch.style.backgroundColor = this.style.symbol.color;
+    var selectedEl = this._createElement('div', colorPalette, 'malette-selected-color', 'Selected color', '');
+    swatch = this._createElement('span', selectedEl, 'malette-selected-swatch', '', 'malette-color-swatch-selected');
+    swatch.style.backgroundColor = selectedColor;
 
     colors.forEach(function(color, i) {
       swatch = document.createElement( 'div' );
@@ -157,7 +143,39 @@
       colorPalette.appendChild( swatch ).className = 'malette-color-swatch';
     }); 
 
-    this._wireEvents();
+  }
+
+
+  /*
+  * Color tab UI 
+  *
+  *
+  */
+  Malette.prototype._constructColorRegion = function(el) {
+    var self = this;
+
+    el.innerHTML = '';
+    
+    this._createElement('div', el, 'malette-single-color-option', 'Single', 'malette-option-toggle malette-option-toggle-selected');
+
+    if ( this.layer ) {
+      this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle');
+    } else {
+      this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle disabled');
+    }
+
+    console.log('this.style.symbol.color', this.style.symbol.color);
+    this._addColors(el, this.style.symbol.color);
+    
+    //Color Ramp Handlers
+    var linkEl = document.getElementsByClassName( 'malette-color-swatch' );
+    for(var i=0;i<linkEl.length;i++){
+      if(linkEl[i].addEventListener){
+        linkEl[i].addEventListener('click', function(e) { self._onColorClick.call(self, e) });
+      } else {
+        linkEl[i].attachEvent('onclick', function(e) { self._onColorClick.call(self, e) });
+      }
+    }
   }
 
 
@@ -223,8 +241,10 @@
     slider.value = width;
     el.appendChild( slider ).id = 'malette-stroke-slider';
 
-    var sizeNumber = this._createElement('div', el, 'malette-stroke-width', 'Stroke width: '+width+'px', '');
+    var sizeNumber = this._createElement('div', el, 'malette-stroke-width', width+'px', '');
     el.appendChild( sizeNumber );
+
+    this._addColors( el, this.style.symbol.outline.color );
 
     //change event 
     var linkEl = document.getElementById( 'malette-stroke-slider' );
@@ -232,6 +252,16 @@
       linkEl.addEventListener('input', function(e) { self._onStrokeWidthChanged.call(self, e) });
     } else {
       linkEl.attachEvent('onchange', function(e) { self._onStrokeWidthChanged.call(self, e) });
+    }
+
+    //Color Ramp Handlers
+    var linkEl = document.getElementsByClassName( 'malette-color-swatch' );
+    for(var i=0;i<linkEl.length;i++){
+      if(linkEl[i].addEventListener){
+        linkEl[i].addEventListener('click', function(e) { self._onStrokeColorClick.call(self, e) });
+      } else {
+        linkEl[i].attachEvent('onclick', function(e) { self._onStrokeColorClick.call(self, e) });
+      }
     }
 
   }
@@ -291,30 +321,6 @@
 
 
 
-  /************* WIRE **************/
-
-
-
-  /*
-  *
-  *
-  */
-  Malette.prototype._wireEvents = function() {
-    var self = this;
-    
-    //Color Ramp Handlers
-    var linkEl = document.getElementsByClassName( 'malette-color-swatch' );
-    for(var i=0;i<linkEl.length;i++){
-      if(linkEl[i].addEventListener){
-        linkEl[i].addEventListener('click', function(e) { self._onColorClick.call(self, e) });
-      } else {
-        linkEl[i].attachEvent('onclick', function(e) { self._onColorClick.call(self, e) });
-      }
-    }
-
-  }
-
-
 
   /************* METHODS **************/
 
@@ -326,7 +332,7 @@
 
     switch(tab) {
       case 'color': 
-        this._constructSingleColorPalette(el);
+        this._constructColorRegion(el);
         break;
       case 'size': 
         this._constructSizePalette(el);
@@ -338,7 +344,7 @@
         this._constructOpacityPalette(el);
         break;
       default: 
-        this._constructSingleColorPalette(el);
+        this._constructColorRegion(el);
     }
 
   }
@@ -355,6 +361,15 @@
   }
 
 
+  Malette.prototype.setSelectedStrokeColor = function(color) {
+
+    this.style.symbol.outline.color = color;
+    var swatch = document.getElementById( 'malette-selected-swatch' );
+    swatch.style.backgroundColor = this.style.symbol.outline.color;
+
+    this._updateStyle();
+  }
+
 
   Malette.prototype.setSelectedSize = function(size) {
     this.style.symbol.size = parseInt(size);
@@ -368,7 +383,7 @@
   Malette.prototype.setStrokeWidth = function(width) {
     this.style.symbol.outline.width = parseFloat(width);
     var el = document.getElementById( 'malette-stroke-width' );
-    el.innerHTML = 'Stroke width: ' + width + 'px';
+    el.innerHTML = width + 'px';
     this._updateStyle();
   }
 
@@ -459,6 +474,7 @@
       console.log('fillOpacity', this.fillOpacity);
 
       this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
+      this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
 
       console.log('emit --->>>', this.style);
       this.emit( 'style-change', this.style );
@@ -502,6 +518,14 @@
     if( e.which === 1 && !(e.metaKey || e.ctrlKey)){
       e.preventDefault();
       this.setSelectedColor(e.target.style.backgroundColor);
+    }
+  };
+
+
+  Malette.prototype._onStrokeColorClick = function(e) {
+    if( e.which === 1 && !(e.metaKey || e.ctrlKey)){
+      e.preventDefault();
+      this.setSelectedStrokeColor(e.target.style.backgroundColor);
     }
   };
 

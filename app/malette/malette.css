@@ -53,6 +53,7 @@
   padding-top: 8px;
   padding-bottom: 8px;
   cursor: pointer;
+  font-size: 1.1rem;
 }
 
 .malette-tab:hover {
@@ -125,6 +126,20 @@
 .malette-color-swatch:hover {
   cursor: pointer;
   border:1px solid #CCC;
+}
+
+#malette-stroke-slider {
+  width:175px;
+  float: left;
+  margin-top:10px;
+}
+
+#malette-stroke-width {
+  width: 45px;
+  float: right;
+  font-size: 1.6rem;
+  text-align: right;
+  margin-right: 8px;
 }
 
 #malette-export-toggle-container {
