@@ -45,8 +45,9 @@
     //initialize 
     this._buildUI();
 
-    console.log('opts', options);
     if ( options.exportStyle === true ) {
+      this.showExport = true;
+      this.exportFormat = options.formatOut;
       this._addExporter();
     }
     
@@ -111,10 +112,50 @@
 
 
   Malette.prototype._addExporter = function() {
+    var self = this;
+
     var container = document.getElementById('malette-header');
     var el = this._createElement('div', container, 'malette-export-toggle-container', 'Export style', '');
     var toggle = this._createElement('input', el, 'malette-export-toggle', '', '');
     toggle.type = 'checkbox';
+    //toggle.checked = true;
+
+    var content = document.getElementById('malette-content');
+    var exporter = this._createElement('div', content, 'malette-export-container', '', '');
+    var header = this._createElement('div', exporter, 'malette-export-header', '', '');
+    
+    var css = this._createElement('input', header, 'malette-export-css-toggle', '', 'export-type-toggle');
+    css.type = 'checkbox';
+    (this.exportFormat === 'css') ? css.checked = true : false;
+    this._createElement('span', header, 'css-out-toggle', 'CSS', 'malette-export-label');
+
+    var esriRenderer = this._createElement('input', header, 'malette-export-esri-toggle', '', 'export-type-toggle');
+    esriRenderer.type = 'checkbox';
+    (this.exportFormat === 'esri-json') ? esriRenderer.checked = true : false;
+    this._createElement('span', header, 'esri-out-toggle', 'Esri Renderer', 'malette-export-label');
+
+    var codeBox = this._createElement('textarea', exporter, 'export-code-block', '', 'code-block');
+    
+    this.selectedExportType = this.exportFormat;
+    this._generateExportStyle( this.exportFormat );
+
+    //events
+    var linkEl = document.getElementById( 'malette-export-toggle' );
+    if(linkEl.addEventListener){
+      linkEl.addEventListener('click', function(e) { self._onToggleExportUI.call(self, e) });
+    } else {
+      linkEl.attachEvent('onclick', function(e) { self._onToggleExportUI.call(self, e) });
+    }
+
+    var typeLink = document.getElementsByClassName( 'export-type-toggle' );
+    for(var i=0;i<typeLink.length;i++){
+      if(typeLink[i].addEventListener){
+        typeLink[i].addEventListener('click', function(e) { self._onExportTypeChange.call(self, e) });
+      } else {
+        typeLink[i].attachEvent('onclick', function(e) { self._onExportTypeChange.call(self, e) });
+      }
+    }
+
   }
 
 
@@ -327,7 +368,6 @@
 
 
   Malette.prototype.changeTab = function(tab) {
-    console.log('tab', tab);
     var el = document.getElementById('malette-content');
 
     switch(tab) {
@@ -349,6 +389,35 @@
 
   }
 
+
+
+  Malette.prototype.toggleExportUI = function(e) {
+    if ( e.target.checked === true ) {
+      document.getElementById("malette-export-container").style.visibility = "visible";
+    } else {
+      document.getElementById("malette-export-container").style.visibility = "hidden";
+    }
+  }
+
+
+  Malette.prototype.changeExportType = function(e) {
+
+    var checkbox = document.getElementsByClassName( 'export-type-toggle' );
+    for(var i=0;i<checkbox.length;i++){
+      document.getElementsByClassName( 'export-type-toggle' )[i].checked = false;
+    }
+    e.target.checked = true;
+
+    var id = e.target.id;
+    if ( id === 'malette-export-esri-toggle' ) {
+      this.selectedExportType = 'esri-json';
+      this._generateExportStyle('esri-json');
+    } else if ( id === 'malette-export-css-toggle' ) {
+      this.selectedExportType = 'css';
+      this._generateExportStyle('css');
+    }
+
+  }
 
 
   Malette.prototype.setSelectedColor = function(color) {
@@ -488,9 +557,36 @@
 
     }
 
+    this._generateExportStyle();
+
   }
 
 
+
+
+  Malette.prototype._generateExportStyle = function(type) {
+    //codeBox.innerHTML = JSON.stringify(this.style, null, 2);
+    type = type || this.selectedExportType; 
+
+    if ( type === 'esri-json' ) {
+
+      console.log('this.style.symbol.color', this.style.symbol.color);
+      console.log('fillOpacity', this.fillOpacity);
+
+      this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
+      this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+
+      document.getElementById('export-code-block').innerHTML = JSON.stringify(this.style, null, 2);
+    } else {
+
+      if ( type === 'css' ) {
+        this._toCss(function(css) {
+          document.getElementById('export-code-block').innerHTML = JSON.stringify(css, null, 2);
+        });
+      }
+
+    }
+  }
 
 
 
@@ -546,6 +642,17 @@
     e.preventDefault();
     this.setOpacity(e.target.value);
   };
+
+
+  Malette.prototype._onToggleExportUI = function(e) {
+    this.toggleExportUI(e);
+  }
+
+
+  Malette.prototype._onExportTypeChange = function(e) {
+    //e.preventDefault();
+    this.changeExportType(e);
+  }
 
 
   Malette.prototype._onTabClick = function(e) {

@@ -19,6 +19,7 @@
   font-weight: 700;
   font-size: 1em;
   line-height: 1em;
+  pointer-events:auto;
   color: rgba(172, 172, 172, 0.7);
   text-shadow: 1px 1px 1px #EEE, 0 0 0 #EEE, 1px 2px 4px #EEE;
 }
@@ -153,6 +154,48 @@
 
 #malette-export-toggle-container input {
   margin-left:4px;
+  cursor: pointer;
+}
+
+#malette-export-container {
+  height: 200px;
+  background-color: #FFF;
+  position: absolute;
+  left: -50px;
+  margin-top: 10px;
+  z-index: 1000;
+  border-top: 1px solid #EEE;
+  width: 300px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  visibility: hidden;
+}
+
+#malette-export-header {
+  border: 1px solid #EEE;
+  width:100%;
+  font-size: 0.8em;
+  overflow: hidden;
+  padding:5px;
+}
+
+#malette-export-header input {
+  margin-right: 3px;
+}
+
+#malette-export-header span {
+  margin-right: 10px;
+}
+
+#export-code-block {
+  width:95%;
+  margin:auto;
+  height: 148px;
+  position: relative;
+  display: block;
+  margin-top: 10px;
+  overflow: hidden;
+  overflow-y:auto;
 }
 
 
