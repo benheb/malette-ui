@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Malette.js | Style generator for maps</title>
+    <title>Malette.js | Esri Leaflet example</title>
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <!-- Place favicon.ico in the root directory -->
@@ -16,18 +16,21 @@
 
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
     <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css">
-    <link rel="stylesheet" href="malette/malette.css" />
+    <link rel="stylesheet" href="../malette/malette.css" />
 
     <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
 
-    <!-- build:css styles/main.css -->
-    <link rel="stylesheet" href="styles/main.css">
+    <!-- build:css ../styles/main.css -->
+    <link rel="stylesheet" href="../styles/main.css">
     <!-- endbuild -->
     
     <!-- build:js scripts/vendor/modernizr.js -->
     <script src="/bower_components/modernizr/modernizr.js"></script>
     <!-- endbuild -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
+
   </head>
   <body>
     <!--[if lt IE 10]>
@@ -36,10 +39,13 @@
     
     <nav class="navbar navbar-default">
       <div class="">
+        <div class="navbar-header">
+          <a href="../" class="navbar-brand">Malette</a>
+        </div>
         <span class="pull-right">
           <ul class="nav navbar-nav">
-            <li><a href="#getting-started">Getting Started</a></li>
-            <li><a href="examples">Examples</a></li>
+            <li><a href="../#getting-started">Getting Started</a></li>
+            <li><a href="#">Examples</a></li>
             <li><a href="docs.html">docs</a></li>
             <li><a href="https://github.com/benheb/malette">Github</a></li>
           </div>
@@ -47,91 +53,65 @@
       </div>
     </nav>
 
-
-    <div id="header">
-      <div id="brand-main">MALETTE.JS</div>
-      <div id="slug">A lightweight style editor for maps</div>
-    </div>
-
-    <div id="map"></div>
-
-    <div class="section">
-      <div class="section-header">
-        <div class="container">
-          <a name="getting-started"></a>
-          <h3>Getting Started</h5>
-        </div>
-      </div>
-      <div class="container" id="getting-started">
-        <div class="row">
-          <div class="col-md-6 col-sm-12">
-            <h4>Javascript Download</h4>
-            <span class="link"><a href="https://raw.githubusercontent.com/benheb/malette/gh-pages/malette/malette.js">https://raw.githubusercontent.com/benheb/malette/gh-pages/malette/malette.js</a></span>
-          </div>
-          <div class="col-md-6 col-sm-12">
-            <h4>Stylesheet Download</h4>
-            <span class="link"><a href="https://raw.githubusercontent.com/benheb/malette/gh-pages/malette/malette.css">https://raw.githubusercontent.com/benheb/malette/gh-pages/malette/malette.css</a></span>
+    <div class="container" id="examples">
+      <div class="row">
+        <div class="col-md-10 col-sm-10">
+          <div id="examples-content">
+            <div id="esri-leaflet-map">
+            </div>
           </div>
         </div>
-
-        <div class="row row-break col-md-12"></div>
-
-        <div class="row">
-          <div class="col-md-12">
-            <span class="blurb"> 
-              Include Malette in your project and initialize it by passing it the container element in which you want it to live and <a href="docs.html">options</a>. 
-            </span>
-            <code>
-              var malette = new Malette(container, options);
-            </code>
-          </div>
+        <div id="examples-list" class="col-md-2 col-sm-2">
+          <h4>Examples</h4>
+          <ul>
+            <li><a href="index.html"> Esri Simple Renderer</a></li>
+            <li><i class="active-example glyphicon glyphicon-menu-right"></i>  <a href="examples/esri-leaflet.html">Esri Leaflet</a></li>
+            <hr />
+            <li>Exporting Styles</li>
+            <hr />
+            <li>Graduated Symbols</li>
+            <li>Thematic Maps</li>
+          </ul>
         </div>
       </div>
-    </div>
+      <div class="row row-break col-md-12"></div>
+      <div class="row">
+        <div class="example-code-block col-md-12 col-sm-12">
+          <code>
+            <pre>
+  var map = L.map('esri-leaflet-map').setView([32.891, -20], 3);
+  L.esri.basemapLayer("Gray").addTo(map);
 
-    <div class="section">
-      <div class="container">
-        <a href="examples" id="example-button" class="custom-btn col-md-2 col-md-offset-5">Examples</a>
-      </div>
-    </div>
+  map.scrollWheelZoom.disable();
+  map.dragging.disable();
 
-    <div class="section">
-      <div class="section-header-light">
-        <div class="container">
-          <div class="line">
-            <a name="developers"></a>
-            <h3>Developers</h5>
-          </div>
-        </div>
-      </div>
-      <div class="container" id="developers">
-        
-        <div class="row row-break col-md-12"></div>
+  var style = {
+      radius: 4,
+      fillColor: "#999",
+      color: "#FFF",
+      weight: 0.5,
+      opacity: 1,
+      fillOpacity: 0.7
+  };
 
-        <div class="row">
-          <div class="col-md-12">
-            <span class="blurb"> 
-              To install Malette, visit <a href="https://github.com/benheb/malette">GitHub</a> and clone the project locally. Then install:  
-            </span>
-            <code>
-              $ npm install 
-            </code>
-            <code>
-              $ bower install 
-            </code>
-            <span class="blurb"> 
-              Serve: 
-            </span>
-            <code>
-              $ gulp serve 
-            </code>
-            <span class="blurb"> 
-              Test: 
-            </span>
-            <code>
-              $ gulp test
-            </code>
-          </div>
+  var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/1', {
+      pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, style);
+      }
+    }).addTo(map);
+
+  var malette = new Malette('esri-leaflet-map', {
+    style: style,
+    format: 'css',
+    exportFormat: 'css'
+  });
+
+
+  malette.on('style-change', function( style ){
+    layer.setStyle(style);
+  });
+            </pre>
+          </code>
         </div>
       </div>
     </div>
@@ -172,14 +152,50 @@
     <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/collapse.js"></script>
     <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
     <!-- endbuild -->
-    
+
     <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
     <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/1.0.0-rc.6/esri-leaflet.js"></script>
 
-    <script src="malette/malette.js"></script>
+    <script src="../malette/malette.js"></script>
 
     <!-- build:js scripts/main.js -->
-    <script src="scripts/main.js"></script>
+    <script src="../scripts/examples.js"></script>
     <!-- endbuild -->
+
+    <script>
+      $( document ).ready(function() {
+        var map = L.map('esri-leaflet-map').setView([32.891, -20], 3);
+        L.esri.basemapLayer("Gray").addTo(map);
+
+        map.scrollWheelZoom.disable();
+        map.dragging.disable();
+
+        var style = {
+            radius: 4,
+            fillColor: "#999",
+            color: "#FFF",
+            weight: 0.5,
+            opacity: 1,
+            fillOpacity: 0.7
+        };
+
+        var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/1', {
+            pointToLayer: function (feature, latlng) {
+              return L.circleMarker(latlng, style);
+            }
+          }).addTo(map);
+
+        var malette = new Malette('esri-leaflet-map', {
+          style: style,
+          format: 'css',
+          exportFormat: 'css'
+        });
+
+
+        malette.on('style-change', function( style ){
+          layer.setStyle(style);
+        });
+      });
+    </script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 
-map = L.map('map').setView([32.891, -20], 3);
+var map = L.map('map').setView([32.891, -20], 3);
 L.esri.basemapLayer("Gray").addTo(map);
 
 map.scrollWheelZoom.disable();
@@ -18,7 +18,7 @@ var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/service
   pointToLayer: function (feature, latlng) {
     return L.circleMarker(latlng, style);
   }
-}).addTo(this.map);
+}).addTo(map);
 
 console.log('layer', layer);
 
