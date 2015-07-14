@@ -136,12 +136,21 @@ body,html {
 }
 
 .link {
-  background-color: $third-color;
+  background-color: rgba(219, 218, 214, 0.1);
   padding: 15px;
+  font-size: 1em;
+  width: 100%;
+  color: #fa9581;
+  display: block;
+  border: 5px solid rgba(219, 218, 214, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link a {
   font-size: 1.5em;
-  width:100%;
   color:$accent-color;
-  border: 5px solid rgba(219, 218, 214, 0.3);// dashed $accent-color;
 }
 
 code {

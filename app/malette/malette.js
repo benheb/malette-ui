@@ -1,3 +1,7 @@
+//! malette.js
+//! version : 0.01
+//! author : Brendan Heberton
+//!license : MIT 
 (function(window){
   'use strict';
 
@@ -420,7 +424,7 @@
     css.fillOpacity = this.fillOpacity / 255;
 
     callback(css);
-    
+
   }
 
 

@@ -104,7 +104,12 @@ gulp.task('malette', () => {
     'app/malette/**/*.css'
   ], {
     dot: true
-  }).pipe(gulp.dest('dist/malette'));
+  })
+  .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
+  .pipe($.if('*.js', $.uglify({
+    preserveComments: 'some'
+  })))
+  .pipe(gulp.dest('dist/malette'));
 });
 
 gulp.task('examples', ['styles'], () => {
