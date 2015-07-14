@@ -20,8 +20,8 @@
     this.layer = options.layer || null;
 
     //style params 
-    this.format = options.format || 'esri-json';
-    this.exportFormat = options.exportFormat || 'esri-json';
+    this.format = options.formatIn || 'esri-json';
+    this.exportFormat = options.formatOut || 'esri-json';
 
     if ( this.format === 'esri-json' ) {
       if ( options.style ) {

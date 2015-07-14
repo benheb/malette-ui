@@ -116,8 +116,8 @@
 
       var malette = new Malette('esri-map', {
         style: json,
-        format: 'esri-json',
-        exportFormat: 'esri-json'
+        formatIn: 'esri-json',
+        formatOut: 'esri-json'
       });
 
       malette.on('style-change', function( style ){
@@ -216,8 +216,8 @@
 
           var malette = new Malette('esri-map', {
             style: json,
-            format: 'esri-json',
-            exportFormat: 'esri-json'
+            formatIn: 'esri-json',
+            formatOut: 'esri-json'
           });
 
           malette.on('style-change', function( style ){

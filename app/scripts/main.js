@@ -24,12 +24,11 @@ console.log('layer', layer);
 
 var malette = new Malette('map', {
   style: style,
-  format: 'css',
-  exportFormat: 'css'
+  formatIn: 'css',
+  formatOut: 'css'
 });
 
 
 malette.on('style-change', function( style ){
-  console.log('main map LISTENER style', style);
   layer.setStyle(style);
 });
