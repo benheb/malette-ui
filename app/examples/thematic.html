@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Malette.js | Esri Leaflet example</title>
+    <title>Malette.js | Thematic maps</title>
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <!-- Place favicon.ico in the root directory -->
@@ -14,7 +14,7 @@
     <!-- endbower -->
     <!-- endbuild -->
 
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css">
     <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css">
     <link rel="stylesheet" href="../malette/malette.css" />
 
@@ -45,7 +45,7 @@
         <span class="pull-right">
           <ul class="nav navbar-nav">
             <li><a href="../#getting-started">Getting Started</a></li>
-            <li><a href="#">Examples</a></li>
+            <li><a href="examples">Examples</a></li>
             <li><a href="../docs.html">docs</a></li>
             <li><a href="https://github.com/benheb/malette">Github</a></li>
           </div>
@@ -57,7 +57,7 @@
       <div class="row">
         <div class="col-md-10 col-sm-10">
           <div id="examples-content">
-            <div id="esri-leaflet-map">
+            <div id="esri-map">
             </div>
           </div>
         </div>
@@ -65,54 +65,76 @@
           <h4>Examples</h4>
           <ul>
             <li><a href="index.html"> Esri Simple Renderer</a></li>
-            <li><i class="active-example glyphicon glyphicon-menu-right"></i>  <a href="examples/esri-leaflet.html">Esri Leaflet</a></li>
+            <li><a href="esri-leaflet.html">Esri Leaflet</a></li>
             <hr />
             <li><a href="export.html">Exporting Styles</a></li>
             <hr />
             <li>Graduated Symbols</li>
-            <li><a href="thematic.html">Thematic Maps</a></li>
+            <li><i class="active-example glyphicon glyphicon-menu-right"></i><a href="examples/thematic.html">Thematic Maps</a></li>
           </ul>
         </div>
       </div>
       <div class="line">
-        <h3>Esri Leaflet style generator</h5>
+        <h3>Thematic styles with Malette</h5>
       </div>
       <div class="row row-break col-md-12"></div>
       <div class="row">
         <div class="example-code-block col-md-12 col-sm-12">
           <code>
             <pre>
-  var map = L.map('esri-leaflet-map').setView([32.891, -20], 3);
-  L.esri.basemapLayer("Gray").addTo(map);
-
-  map.scrollWheelZoom.disable();
-  map.dragging.disable();
-
-  var style = {
-      radius: 4,
-      fillColor: "#999",
-      color: "#FFF",
-      weight: 0.5,
-      opacity: 1,
-      fillOpacity: 0.7
-  };
-
-  var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/1', {
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, style);
-      }
-    }).addTo(map);
-
-  var malette = new Malette('esri-leaflet-map', {
-    style: style,
-    formatIn: 'css',
-    formatOut: 'css'
+require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
+  var map = new Map("esri-map", {
+    center: [-75, 38.5],
+    zoom: 4,
+    basemap: "gray",
+    smartNavigation: false
   });
 
-
-  malette.on('style-change', function( style ){
-    layer.setStyle(style);
+  map.on('load', function() {
+    map.disableScrollWheelZoom();
   });
+
+  var layer = new FeatureLayer('http://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2013/MapServer/82', {
+    mode: FeatureLayer.MODE_ONDEMAND,
+    outFields: ['*']
+  });
+
+  map.addLayer(layer);
+
+  layer.on('load', function() {
+    var simpleJson = layer.renderer.toJson();
+    simpleJson.symbol.color = [255,255,255,100];
+    simpleJson.symbol.outline.width = 0.3;
+    simpleJson.symbol.outline.color = [255,255,255,255];
+
+    var rend = new SimpleRenderer(simpleJson);
+    layer.setRenderer(rend);
+
+    var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
+    
+    $.getJSON('http://opendata.arcgis.com/datasets/b801f4cc689f4a4eab560b842dd07954_82.json', function(res) {
+      
+      var fields = res.data.fields;
+      var malette = new Malette('esri-map', {
+        style: simpleJson,
+        formatIn: 'esri-json',
+        formatOut: 'esri-json',
+        fields: fields
+      });
+
+      malette.on('style-change', function( style ){
+        
+        var rend = jsonUtils.fromJson(style);
+        layer.setRenderer(rend);
+        layer.redraw();
+
+      });
+
+    });
+
+  });
+
+});
             </pre>
           </code>
         </div>
@@ -156,8 +178,7 @@
     <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
     <!-- endbuild -->
 
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/1.0.0-rc.6/esri-leaflet.js"></script>
+    <script src="http://js.arcgis.com/3.13/"></script>
 
     <script src="../malette/malette.js"></script>
 
@@ -166,38 +187,58 @@
     <!-- endbuild -->
 
     <script>
-      $( document ).ready(function() {
-        var map = L.map('esri-leaflet-map').setView([32.891, -20], 3);
-        L.esri.basemapLayer("Gray").addTo(map);
-
-        map.scrollWheelZoom.disable();
-        map.dragging.disable();
-
-        var style = {
-            radius: 4,
-            fillColor: "#999",
-            color: "#FFF",
-            weight: 0.5,
-            opacity: 1,
-            fillOpacity: 0.7
-        };
-
-        var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/1', {
-            pointToLayer: function (feature, latlng) {
-              return L.circleMarker(latlng, style);
-            }
-          }).addTo(map);
-
-        var malette = new Malette('esri-leaflet-map', {
-          style: style,
-          formatIn: 'css',
-          formatOut: 'css'
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
+        var map = new Map("esri-map", {
+          center: [-75, 38.5],
+          zoom: 4,
+          basemap: "gray",
+          smartNavigation: false
         });
 
-
-        malette.on('style-change', function( style ){
-          layer.setStyle(style);
+        map.on('load', function() {
+          map.disableScrollWheelZoom();
         });
+
+        var layer = new FeatureLayer('https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2', {
+          mode: FeatureLayer.MODE_ONDEMAND,
+          outFields: ['*']
+        });
+
+        map.addLayer(layer);
+
+        layer.on('load', function() {
+          var simpleJson = layer.renderer.toJson();
+          simpleJson.symbol.color = [220,220,220,200];
+          simpleJson.symbol.outline.width = 0.3;
+          simpleJson.symbol.outline.color = [255,255,255,255];
+
+          var rend = new SimpleRenderer(simpleJson);
+          layer.setRenderer(rend);
+
+          var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
+          
+          $.getJSON('http://opendata.arcgis.com/datasets/05afb060ab874b32b56b4e9cc6ad581e_2.json', function(res) {
+            
+            var fields = res.data.fields;
+            var malette = new Malette('esri-map', {
+              style: simpleJson,
+              formatIn: 'esri-json',
+              formatOut: 'esri-json',
+              fields: fields
+            });
+
+            malette.on('style-change', function( style ){
+              
+              var rend = jsonUtils.fromJson(style);
+              layer.setRenderer(rend);
+              layer.redraw();
+
+            });
+
+          });
+
+        });
+
       });
     </script>
   </body>

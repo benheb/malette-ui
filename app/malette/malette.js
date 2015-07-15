@@ -110,7 +110,11 @@
 
 
 
-
+  /*
+  * Exporter UI 
+  *
+  *
+  */
   Malette.prototype._addExporter = function() {
     var self = this;
 
@@ -160,6 +164,12 @@
 
 
 
+
+  /*
+  * Color swatch UI generator 
+  * Used both in fill and stroke color UI 
+  * Required {}
+  */ 
   Malette.prototype._addColors = function(el, selectedColor) {
     var swatch;
     var colors = [
@@ -187,6 +197,60 @@
   }
 
 
+
+  /*
+  * Color swatch UI generator 
+  * Used both in fill and stroke color UI 
+  * Required {}
+  */ 
+  Malette.prototype._addThemes = function(el, selectedColor) {
+    var self = this;
+    var select = document.createElement('select');
+    for (var i = 0; i < this.options.fields.length; i++) { 
+      if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' ) {
+        if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
+          var option = document.createElement('option');
+          option.setAttribute('value', this.options.fields[i].type);
+          option.appendChild(document.createTextNode(this.options.fields[i].name));
+          select.appendChild(option);
+        }
+      }
+    }
+
+    var swatch;
+    this.themeColors = [
+      ['rgb(255,255,255)','rgb(240,240,240)','rgb(217,217,217)','rgb(189,189,189)','rgb(150,150,150)','rgb(115,115,115)','rgb(82,82,82)','rgb(37,37,37)'],
+      ['rgb(255,255,217)','rgb(237,248,177)','rgb(199,233,180)','rgb(127,205,187)','rgb(65,182,196)','rgb(29,145,192)','rgb(34,94,168)','rgb(12,44,132)'],
+      ['rgb(255,255,229)','rgb(247,252,185)','rgb(217,240,163)','rgb(173,221,142)','rgb(120,198,121)','rgb(65,171,93)','rgb(35,132,67)','rgb(0,90,50)'],
+      ['rgb(255,247,251)','rgb(236,226,240)','rgb(208,209,230)','rgb(166,189,219)','rgb(103,169,207)','rgb(54,144,192)','rgb(2,129,138)','rgb(1,100,80)'],
+      ['rgb(247,252,253)','rgb(224,236,244)','rgb(191,211,230)','rgb(158,188,218)','rgb(140,150,198)','rgb(140,107,177)','rgb(136,65,157)','rgb(110,1,107)'],
+      ['rgb(255,255,204)','rgb(255,237,160)','rgb(254,217,118)','rgb(254,178,76)','rgb(253,141,60)','rgb(252,78,42)','rgb(227,26,28)','rgb(177,0,38)'],
+      ['rgb(255,245,235)','rgb(254,230,206)','rgb(253,208,162)','rgb(253,174,107)','rgb(253,141,60)','rgb(241,105,19)','rgb(217,72,1)','rgb(140,45,4)']
+    ];
+
+    var colorPaletteContainer = this._createElement('div', el, 'malette-theme-palette', '', '');
+
+    colorPaletteContainer.appendChild( select ).id = 'malette-attr-select';
+  
+    var colorPalette = this._createElement('div', colorPaletteContainer, 'malette-theme-palette-inner', '', '');    
+
+    this.themeColors.forEach(function(colors, i) {
+      var row = self._createElement('div', colorPalette, 'malette-theme-row-'+i, '', 'malette-theme-row');
+      colorPalette.appendChild(row);
+      
+      colors.forEach(function(color) {
+        swatch = document.createElement( 'div' );
+        swatch.style.backgroundColor = color;
+        row.appendChild( swatch ).className = 'malette-theme-swatch';
+      });
+
+    });
+
+  }
+
+
+
+
   /*
   * Color tab UI 
   *
@@ -199,15 +263,16 @@
     
     this._createElement('div', el, 'malette-single-color-option', 'Single', 'malette-option-toggle malette-option-toggle-selected');
 
-    if ( this.layer ) {
+    if ( this.options.fields ) {
       this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle');
     } else {
       this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle disabled');
     }
 
-    console.log('this.style.symbol.color', this.style.symbol.color);
-    this._addColors(el, this.style.symbol.color);
-    
+    var colorContainer = this._createElement('div', el, 'malatte-color-container', '', '');
+
+    this._addColors(colorContainer, this.style.symbol.color);
+
     //Color Ramp Handlers
     var linkEl = document.getElementsByClassName( 'malette-color-swatch' );
     for(var i=0;i<linkEl.length;i++){
@@ -217,6 +282,43 @@
         linkEl[i].attachEvent('onclick', function(e) { self._onColorClick.call(self, e) });
       }
     }
+
+    //events
+    var themeEl = document.getElementById( 'malette-single-color-option' );
+    if(themeEl.addEventListener){
+      themeEl.addEventListener('click', function(e) { self.showSingleColorUI.call(self, e) });
+    } else {
+      themeEl.attachEvent('onclick', function(e) { self.showSingleColorUI.call(self, e) });
+    }
+
+    if ( this.options.fields ) {
+      this._addThemes(colorContainer);
+
+      //events
+      var themeEl = document.getElementById( 'malette-theme-color-option' );
+      if(themeEl.addEventListener){
+        themeEl.addEventListener('click', function(e) { self.showThemeUI.call(self, e) });
+      } else {
+        themeEl.attachEvent('onclick', function(e) { self.showThemeUI.call(self, e) });
+      }
+
+      var themeEl = document.getElementById( 'malette-attr-select' );
+      if(themeEl.addEventListener){
+        themeEl.addEventListener('change', function(e) { self._onAttributeChange.call(self, e) });
+      } else {
+        themeEl.attachEvent('onchange', function(e) { self._onAttributeChange.call(self, e) });
+      }
+
+      var themeRow = document.getElementsByClassName( 'malette-theme-row' );
+      for(var i=0;i<themeRow.length;i++){
+        if(themeRow[i].addEventListener){
+          themeRow[i].addEventListener('click', function(e) { self._onThemeRowClick.call(self, e) });
+        } else {
+          themeRow[i].attachEvent('onclick', function(e) { self._onThemeRowClick.call(self, e) });
+        }
+      }
+    }
+
   }
 
 
@@ -390,6 +492,116 @@
   }
 
 
+  Malette.prototype.classify = function(field){
+
+    var fields = this.options.fields;
+    var breaks = 8; 
+    var values = [];
+
+    fields.forEach(function(f) {
+      if ( f.name === field ) {
+        var step = ( f.statistics.max - f.statistics.min ) / breaks;
+        for (var i = 0; i<=breaks; i++ ) {
+          values.push( f.statistics.min + (step * i) );
+        }
+      }
+    });
+
+    return values;
+  };
+
+
+  Malette.prototype.setTheme = function(ramp) {
+    var index = document.getElementById('malette-attr-select').selectedIndex;
+    var field = document.getElementById('malette-attr-select')[index].innerHTML;
+    
+    //default theme map 
+    if ( !ramp && !this.selectedRamp ) {
+      ramp = [[255,247,251,130],[236,226,240,130],[208,209,230,130],[166,189,219,130],[103,169,207,130],[54,144,192,130],[2,129,138,130],[1,100,80,130]];
+    } else if ( !ramp && this.selectedRamp ) {
+      ramp = this.selectedRamp;
+    }
+    
+    this.selectedRamp = (ramp) ? ramp : this.selectedRamp;
+    
+    var values = this.classify(field);
+    
+    this.style.visualVariables = [
+      { 
+        "type": "colorInfo",
+        "field": field,
+        "stops":  [
+            {
+              "value": values[0],
+              "color": ramp[0],
+              "label": null
+            },
+            {
+              "value": values[1],
+              "color": ramp[1],
+              "label": null
+            },
+            {
+              "value": values[2],
+              "color": ramp[2],
+              "label": null
+            },
+            {
+              "value": values[3],
+              "color": ramp[3],
+              "label": null
+            },
+            {
+              "value": values[4],
+              "color": ramp[4],
+              "label": null
+            },
+            {
+              "value": values[5],
+              "color": ramp[5],
+              "label": null
+            },
+            {
+              "value": values[6],
+              "color": ramp[6],
+              "label": null
+            },
+            {
+              "value": values[7],
+              "color": ramp[7],
+              "label": null
+            }
+        ]
+      }
+    ]
+    this.updateStyle();
+  }
+
+
+  Malette.prototype.clearTheme = function() {
+    this.style.visualVariables = null;
+    this.updateStyle();
+  }
+
+
+  Malette.prototype.showThemeUI = function() {
+    document.getElementById('malette-theme-palette').style.display = 'block';
+    document.getElementById('malette-color-palette').style.display = 'none';
+    document.getElementById('malette-single-color-option').className = 'malette-option-toggle';
+    document.getElementById('malette-theme-color-option').className = 'malette-option-toggle malette-option-toggle-selected';
+    this.setTheme();
+  }
+
+
+  Malette.prototype.showSingleColorUI = function() {
+    document.getElementById('malette-theme-palette').style.display = 'none';
+    document.getElementById('malette-color-palette').style.display = 'block';
+    document.getElementById('malette-single-color-option').className = 'malette-option-toggle malette-option-toggle-selected';
+    document.getElementById('malette-theme-color-option').className = 'malette-option-toggle';
+    this.clearTheme();
+  }
+
+
 
   Malette.prototype.toggleExportUI = function(e) {
     if ( e.target.checked === true ) {
@@ -426,7 +638,21 @@
     var swatch = document.getElementById( 'malette-selected-swatch' );
     swatch.style.backgroundColor = this.style.symbol.color;
 
-    this._updateStyle();
+    this.updateStyle();
+  }
+
+
+  Malette.prototype.setSelectedThemeRow = function(e) {
+    var self = this;
+    var index = parseInt(e.target.id.replace(/malette-theme-row-/g, ''));
+    var ramp = [];
+
+    this.themeColors[ index ].forEach(function(color) {
+      var c = self._rgbaToDojoColor(color);
+      ramp.push(c);
+    });
+
+    this.setTheme(ramp);
   }
 
 
@@ -436,7 +662,7 @@
     var swatch = document.getElementById( 'malette-selected-swatch' );
     swatch.style.backgroundColor = this.style.symbol.outline.color;
 
-    this._updateStyle();
+    this.updateStyle();
   }
 
 
@@ -444,7 +670,7 @@
     this.style.symbol.size = parseInt(size);
     var el = document.getElementById( 'malette-size-number' );
     el.innerHTML = 'Radius: ' + size + 'px';
-    this._updateStyle();
+    this.updateStyle();
   }
 
 
@@ -453,7 +679,7 @@
     this.style.symbol.outline.width = parseFloat(width);
     var el = document.getElementById( 'malette-stroke-width' );
     el.innerHTML = width + 'px';
-    this._updateStyle();
+    this.updateStyle();
   }
 
 
@@ -461,7 +687,7 @@
     this.fillOpacity = parseFloat(opacity) * 255;
     var el = document.getElementById( 'malette-opacity-number' );
     el.innerHTML = 'Opacity: ' + (opacity*100) + '%';
-    this._updateStyle();
+    this.updateStyle();
   }
 
 
@@ -534,16 +760,15 @@
   * Updates and emits 
   *
   */
-  Malette.prototype._updateStyle = function() {
+  Malette.prototype.updateStyle = function() {
     var self = this; 
 
     if ( this.exportFormat === 'esri-json' ) {
 
-      console.log('this.style.symbol.color', this.style.symbol.color);
-      console.log('fillOpacity', this.fillOpacity);
-
-      this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
-      this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+      if ( this.style.symbol ) {
+        this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
+        this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+      }
 
       console.log('emit --->>>', this.style);
       this.emit( 'style-change', this.style );
@@ -616,6 +841,17 @@
       this.setSelectedColor(e.target.style.backgroundColor);
     }
   };
+
+
+  Malette.prototype._onThemeRowClick = function(e) {
+    e.preventDefault();
+    this.setSelectedThemeRow(e);
+  };
+
+
+  Malette.prototype._onAttributeChange = function(e) {
+    this.setTheme();
+  }
 
 
   Malette.prototype._onStrokeColorClick = function(e) {

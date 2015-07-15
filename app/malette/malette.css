@@ -77,6 +77,10 @@
   padding-bottom: 2px;
 }
 
+.malette-option-toggle:hover {
+  cursor: pointer;
+}
+
 .malette-option-toggle.disabled {
   color:#DDD;
   border:1px solid #EEE;
@@ -86,7 +90,7 @@
   background: #EEE;
 }
 
-#malette-color-palette {
+#malette-color-palette, #malette-theme-palette {
   width:100%;
   margin:auto;
   margin-top: 5px;
@@ -127,6 +131,35 @@
 .malette-color-swatch:hover {
   cursor: pointer;
   border:1px solid #CCC;
+}
+
+#malette-theme-palette {
+  display: none;
+}
+
+.malette-theme-swatch {
+  width: 28.2px;
+  height: 18px;
+  border: none;
+  float: left;
+  margin: 0px;
+  pointer-events:none;
+}
+
+.malette-theme-row {
+  overflow: hidden;
+  border:1px solid #FFF;
+  margin-bottom: 3px;
+}
+
+.malette-theme-row:hover {
+  border:1px solid #999;
+  cursor: pointer;
+}
+
+#malette-attr-select {
+  margin-bottom: 5px;
+  right: 0px;
 }
 
 #malette-stroke-slider {
