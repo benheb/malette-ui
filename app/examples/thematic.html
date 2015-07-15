@@ -69,7 +69,7 @@
             <hr />
             <li><a href="export.html">Exporting Styles</a></li>
             <hr />
-            <li>Graduated Symbols</li>
+            <li><a href="graduated.html">Graduated Symbols</a></li>
             <li><i class="active-example glyphicon glyphicon-menu-right"></i><a href="examples/thematic.html">Thematic Maps</a></li>
           </ul>
         </div>
@@ -214,8 +214,6 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
 
           var rend = new SimpleRenderer(simpleJson);
           layer.setRenderer(rend);
-
-          var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
           
           $.getJSON('http://opendata.arcgis.com/datasets/05afb060ab874b32b56b4e9cc6ad581e_2.json', function(res) {
             

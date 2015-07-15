@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Malette.js | Esri simple renderer example</title>
+    <title>Malette.js | Thematic maps</title>
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <!-- Place favicon.ico in the root directory -->
@@ -64,69 +64,67 @@
         <div id="examples-list" class="col-md-2 col-sm-2">
           <h4>Examples</h4>
           <ul>
-            <li><i class="active-example glyphicon glyphicon-menu-right"></i> <a href="examples">Esri Simple Renderer</a></li>
+            <li><a href="index.html"> Esri Simple Renderer</a></li>
             <li><a href="esri-leaflet.html">Esri Leaflet</a></li>
             <hr />
             <li><a href="export.html">Exporting Styles</a></li>
             <hr />
-            <li><a href="graduated.html">Graduated Symbols</a></li>
+            <li><i class="active-example glyphicon glyphicon-menu-right"></i> <a href="examples/graduated.html">Graduated Symbols</a></li>
             <li><a href="thematic.html">Thematic Maps</a></li>
           </ul>
         </div>
       </div>
       <div class="line">
-        <h3>Esri simple renderer generator</h5>
+        <h3>Graduated Symbols</h5>
       </div>
       <div class="row row-break col-md-12"></div>
       <div class="row">
         <div class="example-code-block col-md-12 col-sm-12">
           <code>
             <pre>
-  require([
-    "esri/map", 
-    "esri/layers/FeatureLayer", 
-    "esri/renderers/SimpleRenderer", 
-    "dojo/domReady!"
-  ], 
+require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
   var map = new Map("esri-map", {
-      center: [-118, 34.5],
-      zoom: 7,
-      basemap: "topo",
-      smartNavigation: false
-    });
+    center: [-75, 38.5],
+    zoom: 4,
+    basemap: "gray",
+    smartNavigation: false
+  });
 
-    map.on('load', function() {
-      map.disableScrollWheelZoom();
-    });
+  map.on('load', function() {
+    map.disableScrollWheelZoom();
+  });
 
-    var layer = new FeatureLayer('http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/2012_CA_NHTSA/FeatureServer/0', {
-      mode: FeatureLayer.MODE_ONDEMAND,
-      outFields: ['*']
-    });
+  var layer = new FeatureLayer('http://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2013/MapServer/82', {
+    mode: FeatureLayer.MODE_ONDEMAND,
+    outFields: ['*']
+  });
 
-    map.addLayer(layer);
+  map.addLayer(layer);
 
-    layer.on('load', function() {
-      //console.log('layer', layer);
-      var json = {
-        type: 'simple',
-        symbol: layer.renderer.toJson().defaultSymbol
-      }
+  layer.on('load', function() {
+    var simpleJson = layer.renderer.toJson();
+    simpleJson.symbol.color = [255,255,255,100];
+    simpleJson.symbol.outline.width = 0.3;
+    simpleJson.symbol.outline.color = [255,255,255,255];
+
+    var rend = new SimpleRenderer(simpleJson);
+    layer.setRenderer(rend);
+
+    var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
+    
+    $.getJSON('http://opendata.arcgis.com/datasets/b801f4cc689f4a4eab560b842dd07954_82.json', function(res) {
       
-      var rend = new SimpleRenderer(json);
-      layer.setRenderer(rend);
-      layer.redraw();
-
+      var fields = res.data.fields;
       var malette = new Malette('esri-map', {
-        style: json,
+        style: simpleJson,
         formatIn: 'esri-json',
-        formatOut: 'esri-json'
+        formatOut: 'esri-json',
+        fields: fields
       });
 
       malette.on('style-change', function( style ){
-        console.log('exported style', style);
-
-        var rend = new SimpleRenderer(style);
+        
+        var rend = jsonUtils.fromJson(style);
         layer.setRenderer(rend);
         layer.redraw();
 
@@ -135,6 +133,8 @@
     });
 
   });
+
+});
             </pre>
           </code>
         </div>
@@ -187,11 +187,11 @@
     <!-- endbuild -->
 
     <script>
-      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer) { 
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
         var map = new Map("esri-map", {
           center: [-118, 34.5],
           zoom: 7,
-          basemap: "topo",
+          basemap: "gray",
           smartNavigation: false
         });
 
@@ -217,18 +217,24 @@
           layer.setRenderer(rend);
           layer.redraw();
 
-          var malette = new Malette('esri-map', {
-            style: json,
-            formatIn: 'esri-json',
-            formatOut: 'esri-json'
-          });
+          $.getJSON('http://opendataqa.arcgis.com/datasets/059972b3752b490c97d20c1b99c88702_0.json', function(res) {
+            
+            var fields = res.data.fields;
+            var malette = new Malette('esri-map', {
+              style: json,
+              formatIn: 'esri-json',
+              formatOut: 'esri-json',
+              fields: fields,
+              type: 'point'
+            });
 
-          malette.on('style-change', function( style ){
-            console.log('exported style', style);
+            malette.on('style-change', function( style ){
+              
+              var rend = jsonUtils.fromJson(style);
+              layer.setRenderer(rend);
+              layer.redraw();
 
-            var rend = new SimpleRenderer(style);
-            layer.setRenderer(rend);
-            layer.redraw();
+            });
 
           });
 

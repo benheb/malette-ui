@@ -194,8 +194,7 @@
   height: 200px;
   background-color: #FFF;
   position: absolute;
-  left: -50px;
-  margin-top: 10px;
+  margin-top: -5px;
   z-index: 1000;
   border-top: 1px solid #EEE;
   width: 300px;
@@ -229,12 +228,23 @@
   margin-top: 10px;
   overflow: hidden;
   overflow-y:auto;
+  pointer-events:auto;
 }
 
 
 /* size */
 #malette-size-slider {
   margin-top: 45px;
+}
+
+#malette-graduated-palette {
+  overflow: hidden;
+  width:100%;
+  margin-top:25px;
+}
+
+#malette-graduated-palette {
+  display: none;
 }
 
 input[type=range] {

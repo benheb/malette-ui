@@ -124,7 +124,7 @@
     toggle.type = 'checkbox';
     //toggle.checked = true;
 
-    var content = document.getElementById('malette-content');
+    var content = document.getElementById('malette');
     var exporter = this._createElement('div', content, 'malette-export-container', '', '');
     var header = this._createElement('div', exporter, 'malette-export-header', '', '');
     
@@ -205,19 +205,10 @@
   */ 
   Malette.prototype._addThemes = function(el, selectedColor) {
     var self = this;
-    var select = document.createElement('select');
-    for (var i = 0; i < this.options.fields.length; i++) { 
-      if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' ) {
-        if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
-          var option = document.createElement('option');
-          option.setAttribute('value', this.options.fields[i].type);
-          option.appendChild(document.createTextNode(this.options.fields[i].name));
-          select.appendChild(option);
-        }
-      }
-    }
-
     var swatch;
+
+    var select = this._createAttributeSelect();
+
     this.themeColors = [
       ['rgb(255,255,255)','rgb(240,240,240)','rgb(217,217,217)','rgb(189,189,189)','rgb(150,150,150)','rgb(115,115,115)','rgb(82,82,82)','rgb(37,37,37)'],
       ['rgb(255,255,217)','rgb(237,248,177)','rgb(199,233,180)','rgb(127,205,187)','rgb(65,182,196)','rgb(29,145,192)','rgb(34,94,168)','rgb(12,44,132)'],
@@ -322,6 +313,18 @@
   }
 
 
+
+
+  Malette.prototype._addGraduated = function(el) {
+    var select = this._createAttributeSelect();
+    var graduatedPaletteContainer = this._createElement('div', el, 'malette-graduated-palette', '', '');
+
+    graduatedPaletteContainer.appendChild( select ).id = 'malette-grad-attr-select';
+  }
+
+
+
+
   /*
   * Size tab UI
   *
@@ -333,11 +336,13 @@
     el.innerHTML = '';
 
     this._createElement('div', el, 'malette-single-size-option', 'Single', 'malette-option-toggle malette-option-toggle-selected');
-    if ( this.layer ) {
+    if ( this.options.fields ) {
       this._createElement('div', el, 'malette-graduated-size-option', 'Graduated', 'malette-option-toggle');
     } else {
       this._createElement('div', el, 'malette-graduated-size-option', 'Graduated', 'malette-option-toggle disabled');
     }
+
+    var sizePalette = this._createElement('div', el, 'malette-size-palette', '', '');
 
     var size = this.style.symbol.size || 8; 
 
@@ -347,17 +352,43 @@
     slider.max = 30;
     slider.step = 1;
     slider.value = size;
-    el.appendChild( slider ).id = 'malette-size-slider';
+    sizePalette.appendChild( slider ).id = 'malette-size-slider';
 
-    var sizeNumber = this._createElement('div', el, 'malette-size-number', 'Radius: '+size+'px', '');
-    el.appendChild( sizeNumber );
-
+    var sizeNumber = this._createElement('div', sizePalette, 'malette-size-number', 'Radius: '+size+'px', '');
+    
     //change event 
     var linkEl = document.getElementById( 'malette-size-slider' );
     if(linkEl.addEventListener){
       linkEl.addEventListener('input', function(e) { self._onSizeChanged.call(self, e) });
     } else {
       linkEl.attachEvent('onchange', function(e) { self._onSizeChanged.call(self, e) });
+    }
+
+    var themeEl = document.getElementById( 'malette-single-size-option' );
+    if(themeEl.addEventListener){
+      themeEl.addEventListener('click', function(e) { self.showSingleSizeUI.call(self, e) });
+    } else {
+      themeEl.attachEvent('onclick', function(e) { self.showSingleSizeUI.call(self, e) });
+    }
+
+    if ( this.options.fields ) {
+      this._addGraduated(el);
+
+      //events
+      var themeEl = document.getElementById( 'malette-graduated-size-option' );
+      if(themeEl.addEventListener){
+        themeEl.addEventListener('click', function(e) { self.showGraduatedUI.call(self, e) });
+      } else {
+        themeEl.attachEvent('onclick', function(e) { self.showGraduatedUI.call(self, e) });
+      }
+
+      var themeEl = document.getElementById( 'malette-grad-attr-select' );
+      if(themeEl.addEventListener){
+        themeEl.addEventListener('change', function(e) { self._onGradAttributeChange.call(self, e) });
+      } else {
+        themeEl.attachEvent('onchange', function(e) { self._onGradAttributeChange.call(self, e) });
+      }
+
     }
 
   }
@@ -463,6 +494,21 @@
   }
 
 
+
+  Malette.prototype._createAttributeSelect = function() {
+    var select = document.createElement('select');
+    for (var i = 0; i < this.options.fields.length; i++) { 
+      if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' ) {
+        if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
+          var option = document.createElement('option');
+          option.setAttribute('value', this.options.fields[i].type);
+          option.appendChild(document.createTextNode(this.options.fields[i].name));
+          select.appendChild(option);
+        }
+      }
+    }
+    return select;
+  }
 
 
   /************* METHODS **************/
@@ -578,8 +624,123 @@
   }
 
 
+  Malette.prototype.setGraduated = function(field) {
+    
+    this.selectedField = ( field ) ? field : this.selectedField;
+
+    var values = this.classify( this.selectedField );
+
+    this.style.type = "classBreaks";
+    this.style.field = this.selectedField;
+    this.style.minValue = 1;
+    this.style.classBreakInfos = [
+      {
+        "symbol": {
+          "color": this._rgbaToDojoColor(this.style.symbol.color),
+          "size": 4,
+          "xoffset": 0,
+          "yoffset": 0,
+          "type": "esriSMS",
+          "style": "esriSMSCircle",
+          "outline": {
+            "color": this._rgbaToDojoColor(this.style.symbol.outline.color),
+            "width": this.style.symbol.outline.width,
+            "type": "esriSLS",
+            "style": "esriSLSSolid"
+          }
+        },
+        "label": values[0],
+        "classMaxValue": values[0]
+      },
+      {
+        "symbol": {
+          "color": this._rgbaToDojoColor(this.style.symbol.color),
+          "size": 10,
+          "xoffset": 0,
+          "yoffset": 0,
+          "type": "esriSMS",
+          "style": "esriSMSCircle",
+          "outline": {
+            "color": this._rgbaToDojoColor(this.style.symbol.outline.color),
+            "width": this.style.symbol.outline.width,
+            "type": "esriSLS",
+            "style": "esriSLSSolid"
+          }
+        },
+        "label": "> "+values[0]+" to "+values[1],
+        "classMaxValue": values[1]
+      },
+      {
+       "symbol": {
+          "color": this._rgbaToDojoColor(this.style.symbol.color),
+          "size": 16,
+          "xoffset": 0,
+          "yoffset": 0,
+          "type": "esriSMS",
+          "style": "esriSMSCircle",
+          "outline": {
+            "color": this._rgbaToDojoColor(this.style.symbol.outline.color),
+            "width": this.style.symbol.outline.width,
+            "type": "esriSLS",
+            "style": "esriSLSSolid"
+          }
+        },
+        "label": "> "+values[1]+" to "+values[2],
+        "classMaxValue": values[2]
+      },
+      {
+        "symbol": {
+          "color": this._rgbaToDojoColor(this.style.symbol.color),
+          "size": 22,
+          "xoffset": 0,
+          "yoffset": 0,
+          "type": "esriSMS",
+          "style": "esriSMSCircle",
+          "outline": {
+            "color": this._rgbaToDojoColor(this.style.symbol.outline.color),
+            "width": this.style.symbol.outline.width,
+            "type": "esriSLS",
+            "style": "esriSLSSolid"
+          }
+        },
+        "label": "> "+values[2]+" to "+values[3],
+        "classMaxValue": values[3]
+      },
+      {
+        "symbol": {
+          "color": this._rgbaToDojoColor(this.style.symbol.color),
+          "size": 30,
+          "xoffset": 0,
+          "yoffset": 0,
+          "type": "esriSMS",
+          "style": "esriSMSCircle",
+          "outline": {
+            "color": this._rgbaToDojoColor(this.style.symbol.outline.color),
+            "width": this.style.symbol.outline.width,
+            "type": "esriSLS",
+            "style": "esriSLSSolid"
+          }
+        },
+        "label": "> "+values[3]+" to "+values[4],
+        "classMaxValue": values[4]
+      }
+    ]
+
+    this.updateStyle();
+  }
+
+
   Malette.prototype.clearTheme = function() {
     this.style.visualVariables = null;
+    this.updateStyle();
+  }
+
+
+  Malette.prototype.clearGraduated = function() {
+    this.style.type = "simple";
+    this.style.field = null;
+    this.style.minValue = 1;
+    this.style.classBreakInfos = null;
     this.updateStyle();
   }
 
@@ -601,6 +762,29 @@
     this.clearTheme();
   }
 
+
+  Malette.prototype.showGraduatedUI = function() {
+    document.getElementById('malette-graduated-palette').style.display = 'block';
+    document.getElementById('malette-size-palette').style.display = 'none';
+    document.getElementById('malette-single-size-option').className = 'malette-option-toggle';
+    document.getElementById('malette-graduated-size-option').className = 'malette-option-toggle malette-option-toggle-selected';
+    this._isGraduated = true;
+
+    var index = document.getElementById('malette-grad-attr-select').selectedIndex;
+    var field = document.getElementById('malette-grad-attr-select')[index].innerHTML;
+
+    this.setGraduated(field);
+  }
+
+
+  Malette.prototype.showSingleSizeUI = function() {
+    document.getElementById('malette-graduated-palette').style.display = 'none';
+    document.getElementById('malette-size-palette').style.display = 'block';
+    document.getElementById('malette-single-size-option').className = 'malette-option-toggle malette-option-toggle-selected';
+    document.getElementById('malette-graduated-size-option').className = 'malette-option-toggle';
+    this._isGraduated = false;
+    this.clearGraduated();
+  }
 
 
   Malette.prototype.toggleExportUI = function(e) {
@@ -638,7 +822,11 @@
     var swatch = document.getElementById( 'malette-selected-swatch' );
     swatch.style.backgroundColor = this.style.symbol.color;
 
-    this.updateStyle();
+    if ( this._isGraduated ) {
+      this.setGraduated();
+    } else {
+      this.updateStyle();
+    }
   }
 
 
@@ -662,7 +850,11 @@
     var swatch = document.getElementById( 'malette-selected-swatch' );
     swatch.style.backgroundColor = this.style.symbol.outline.color;
 
-    this.updateStyle();
+    if ( this._isGraduated ) {
+      this.setGraduated();
+    } else {
+      this.updateStyle();
+    }
   }
 
 
@@ -679,7 +871,11 @@
     this.style.symbol.outline.width = parseFloat(width);
     var el = document.getElementById( 'malette-stroke-width' );
     el.innerHTML = width + 'px';
-    this.updateStyle();
+    if ( this._isGraduated ) {
+      this.setGraduated();
+    } else {
+      this.updateStyle();
+    }
   }
 
 
@@ -687,7 +883,11 @@
     this.fillOpacity = parseFloat(opacity) * 255;
     var el = document.getElementById( 'malette-opacity-number' );
     el.innerHTML = 'Opacity: ' + (opacity*100) + '%';
-    this.updateStyle();
+    if ( this._isGraduated ) {
+      this.setGraduated();
+    } else {
+      this.updateStyle();
+    }
   }
 
 
@@ -853,6 +1053,11 @@
     this.setTheme();
   }
 
+  Malette.prototype._onGradAttributeChange = function(e) {
+    var index = document.getElementById('malette-grad-attr-select').selectedIndex;
+    var field = document.getElementById('malette-grad-attr-select')[index].innerHTML;
+    this.setGraduated(field);
+  }
 
   Malette.prototype._onStrokeColorClick = function(e) {
     if( e.which === 1 && !(e.metaKey || e.ctrlKey)){
@@ -894,6 +1099,7 @@
   Malette.prototype._onTabClick = function(e) {
     if( e.which === 1 && !(e.metaKey || e.ctrlKey)){
       e.preventDefault();
+
       var els = document.getElementsByClassName( 'malette-tab' );
       for(var i=0;i<els.length;i++){
         els[i].classList.remove( 'malette-tab-selected' );
