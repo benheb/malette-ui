@@ -7,6 +7,7 @@
 
   var Malette = function Malette( container, options ) {
     console.log('init Malette, options: ', options);
+    var self = this;
 
     //store options 
     this.options = options;
@@ -16,8 +17,9 @@
     this.height = options.height || 'auto';
     this.container = container;
     this._handlers = {};
-        
-    this.layer = options.layer || null;
+    this.state = {};
+    this.state._isGraduated = false;
+    this.state._isTheme = false;
 
     //style params 
     this.format = options.formatIn || 'esri-json';
@@ -27,7 +29,7 @@
       if ( options.style ) {
         
         this.style = options.style || {};
-        this.fillOpacity = this.style.symbol.color[3];
+        this.state.fillOpacity = this.style.symbol.color[3];
         this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc\
         this.style.symbol.outline.color = this._dojoColorToRgba( this.style.symbol.outline.color );
 
@@ -50,7 +52,7 @@
       this.exportFormat = options.formatOut;
       this._addExporter();
     }
-    
+
   };
 
 
@@ -310,6 +312,12 @@
       }
     }
 
+    this._selectOption('malette-attr-select', 'selectedField');
+
+    if ( this.state._isTheme ) {
+      self.showThemeUI();
+    }
+
   }
 
 
@@ -391,6 +399,12 @@
 
     }
 
+    this._selectOption('malette-grad-attr-select', 'selectedField');
+    
+    if ( this.state._isGraduated ) {
+      self.showGraduatedUI();
+    }
+
   }
 
 
@@ -453,7 +467,7 @@
 
     el.innerHTML = '';
 
-    var opacity = (this.fillOpacity / 255) || 0.7; 
+    var opacity = (this.state.fillOpacity / 255) || 0.7; 
 
     var slider = document.createElement( 'input' );
     slider.type = 'range';
@@ -502,6 +516,7 @@
         if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
           var option = document.createElement('option');
           option.setAttribute('value', this.options.fields[i].type);
+          option.setAttribute('id', this.options.fields[i].name.replace(/ /g, ''));
           option.appendChild(document.createTextNode(this.options.fields[i].name));
           select.appendChild(option);
         }
@@ -510,6 +525,19 @@
     return select;
   }
 
+
+  Malette.prototype._selectOption = function(id, field) {
+    if ( this.state[ field ] ) {
+      var index = 0;
+      var x = document.getElementById( id );
+      for (var i = 0; i < x.length; i++) {
+        if ( x.options[i].text === this.state[ field ].replace(/ /g, '') ) {
+          index = x.options[i].index;
+        }
+      }
+      document.getElementById( id ).getElementsByTagName('option')[index].selected = 'selected';
+    }
+  }
 
   /************* METHODS **************/
 
@@ -557,10 +585,10 @@
   };
 
 
-  Malette.prototype.setTheme = function(ramp) {
-    var index = document.getElementById('malette-attr-select').selectedIndex;
-    var field = document.getElementById('malette-attr-select')[index].innerHTML;
+  Malette.prototype.setTheme = function(ramp, field) {
     
+    this.state.selectedField = ( field ) ? field : this.state.selectedField; 
+
     //default theme map 
     if ( !ramp && !this.selectedRamp ) {
       ramp = [[255,247,251,130],[236,226,240,130],[208,209,230,130],[166,189,219,130],[103,169,207,130],[54,144,192,130],[2,129,138,130],[1,100,80,130]];
@@ -570,12 +598,12 @@
     
     this.selectedRamp = (ramp) ? ramp : this.selectedRamp;
     
-    var values = this.classify(field);
+    var values = this.classify( this.state.selectedField );
     
     this.style.visualVariables = [
       { 
         "type": "colorInfo",
-        "field": field,
+        "field": this.state.selectedField,
         "stops":  [
             {
               "value": values[0],
@@ -626,12 +654,12 @@
 
   Malette.prototype.setGraduated = function(field) {
     
-    this.selectedField = ( field ) ? field : this.selectedField;
+    this.state.selectedField = ( field ) ? field : this.state.selectedField;
 
-    var values = this.classify( this.selectedField );
+    var values = this.classify( this.state.selectedField );
 
     this.style.type = "classBreaks";
-    this.style.field = this.selectedField;
+    this.style.field = this.state.selectedField;
     this.style.minValue = 1;
     this.style.classBreakInfos = [
       {
@@ -750,6 +778,7 @@
     document.getElementById('malette-color-palette').style.display = 'none';
     document.getElementById('malette-single-color-option').className = 'malette-option-toggle';
     document.getElementById('malette-theme-color-option').className = 'malette-option-toggle malette-option-toggle-selected';
+    this.state._isTheme = true;
     this.setTheme();
   }
 
@@ -759,6 +788,7 @@
     document.getElementById('malette-color-palette').style.display = 'block';
     document.getElementById('malette-single-color-option').className = 'malette-option-toggle malette-option-toggle-selected';
     document.getElementById('malette-theme-color-option').className = 'malette-option-toggle';
+    this.state._isTheme = false;
     this.clearTheme();
   }
 
@@ -768,7 +798,7 @@
     document.getElementById('malette-size-palette').style.display = 'none';
     document.getElementById('malette-single-size-option').className = 'malette-option-toggle';
     document.getElementById('malette-graduated-size-option').className = 'malette-option-toggle malette-option-toggle-selected';
-    this._isGraduated = true;
+    this.state._isGraduated = true;
 
     var index = document.getElementById('malette-grad-attr-select').selectedIndex;
     var field = document.getElementById('malette-grad-attr-select')[index].innerHTML;
@@ -782,7 +812,7 @@
     document.getElementById('malette-size-palette').style.display = 'block';
     document.getElementById('malette-single-size-option').className = 'malette-option-toggle malette-option-toggle-selected';
     document.getElementById('malette-graduated-size-option').className = 'malette-option-toggle';
-    this._isGraduated = false;
+    this.state._isGraduated = false;
     this.clearGraduated();
   }
 
@@ -822,7 +852,7 @@
     var swatch = document.getElementById( 'malette-selected-swatch' );
     swatch.style.backgroundColor = this.style.symbol.color;
 
-    if ( this._isGraduated ) {
+    if ( this.state._isGraduated ) {
       this.setGraduated();
     } else {
       this.updateStyle();
@@ -850,7 +880,7 @@
     var swatch = document.getElementById( 'malette-selected-swatch' );
     swatch.style.backgroundColor = this.style.symbol.outline.color;
 
-    if ( this._isGraduated ) {
+    if ( this.state._isGraduated ) {
       this.setGraduated();
     } else {
       this.updateStyle();
@@ -871,8 +901,15 @@
     this.style.symbol.outline.width = parseFloat(width);
     var el = document.getElementById( 'malette-stroke-width' );
     el.innerHTML = width + 'px';
-    if ( this._isGraduated ) {
+    
+    if ( this.state._isGraduated ) {
       this.setGraduated();
+    } else {
+      this.updateStyle();
+    }
+
+    if ( this.state._isTheme ) {
+      this.setTheme();
     } else {
       this.updateStyle();
     }
@@ -880,10 +917,10 @@
 
 
   Malette.prototype.setOpacity = function(opacity) {
-    this.fillOpacity = parseFloat(opacity) * 255;
+    this.state.fillOpacity = parseFloat(opacity) * 255;
     var el = document.getElementById( 'malette-opacity-number' );
     el.innerHTML = 'Opacity: ' + (opacity*100) + '%';
-    if ( this._isGraduated ) {
+    if ( this.state._isGraduated ) {
       this.setGraduated();
     } else {
       this.updateStyle();
@@ -929,7 +966,7 @@
       this.style.symbol.outline = {};
       this.style.symbol.outline.width = this.options.style.weight || 1; 
       this.style.symbol.outline.color = [ this.options.style.color ] || 'rgba(255,255,255,255';
-      this.fillOpacity = ( this.options.style.fillOpacity ) ? (this.options.style.fillOpacity * 255) : 255;
+      this.state.fillOpacity = ( this.options.style.fillOpacity ) ? (this.options.style.fillOpacity * 255) : 255;
     }
 
   }
@@ -947,7 +984,7 @@
     css.weight = this.style.symbol.outline.width;
     css.color = this.style.symbol.outline.color;
     css.radius = this.style.symbol.size;
-    css.fillOpacity = this.fillOpacity / 255;
+    css.fillOpacity = this.state.fillOpacity / 255;
 
     callback(css);
 
@@ -966,7 +1003,7 @@
     if ( this.exportFormat === 'esri-json' ) {
 
       if ( this.style.symbol ) {
-        this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
+        this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.state.fillOpacity ); //change colors BACK to dojo :(
         this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
       }
 
@@ -996,9 +1033,9 @@
     if ( type === 'esri-json' ) {
 
       console.log('this.style.symbol.color', this.style.symbol.color);
-      console.log('fillOpacity', this.fillOpacity);
+      console.log('fillOpacity', this.state.fillOpacity);
 
-      this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.fillOpacity ); //change colors BACK to dojo :(
+      this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.state.fillOpacity ); //change colors BACK to dojo :(
       this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
 
       document.getElementById('export-code-block').innerHTML = JSON.stringify(this.style, null, 2);
@@ -1050,13 +1087,26 @@
 
 
   Malette.prototype._onAttributeChange = function(e) {
-    this.setTheme();
+    var index = document.getElementById('malette-attr-select').selectedIndex;
+    var field = document.getElementById('malette-attr-select')[index].innerHTML;
+    this.state.selectedField = field;
+    this.setTheme(null, field);
+    console.log('on attr change!', this._isGraduated);
+
+    if ( this.state._isGraduated ) {
+      this.setGraduated(field);
+    }
   }
 
   Malette.prototype._onGradAttributeChange = function(e) {
     var index = document.getElementById('malette-grad-attr-select').selectedIndex;
     var field = document.getElementById('malette-grad-attr-select')[index].innerHTML;
+    this.state.selectedField = field;
     this.setGraduated(field);
+
+    if ( this.state._isTheme ) {
+      this.setTheme(null, field);
+    }
   }
 
   Malette.prototype._onStrokeColorClick = function(e) {

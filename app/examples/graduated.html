@@ -83,58 +83,59 @@
           <code>
             <pre>
 require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
-  var map = new Map("esri-map", {
-    center: [-75, 38.5],
-    zoom: 4,
-    basemap: "gray",
-    smartNavigation: false
-  });
+    var map = new Map("esri-map", {
+      center: [-118, 34.5],
+      zoom: 7,
+      basemap: "gray",
+      smartNavigation: false
+    });
 
-  map.on('load', function() {
-    map.disableScrollWheelZoom();
-  });
+    map.on('load', function() {
+      map.disableScrollWheelZoom();
+    });
 
-  var layer = new FeatureLayer('http://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2013/MapServer/82', {
-    mode: FeatureLayer.MODE_ONDEMAND,
-    outFields: ['*']
-  });
+    var layer = new FeatureLayer('http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/2012_CA_NHTSA/FeatureServer/0', {
+      mode: FeatureLayer.MODE_ONDEMAND,
+      outFields: ['*']
+    });
 
-  map.addLayer(layer);
+    map.addLayer(layer);
 
-  layer.on('load', function() {
-    var simpleJson = layer.renderer.toJson();
-    simpleJson.symbol.color = [255,255,255,100];
-    simpleJson.symbol.outline.width = 0.3;
-    simpleJson.symbol.outline.color = [255,255,255,255];
-
-    var rend = new SimpleRenderer(simpleJson);
-    layer.setRenderer(rend);
-
-    var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
-    
-    $.getJSON('http://opendata.arcgis.com/datasets/b801f4cc689f4a4eab560b842dd07954_82.json', function(res) {
+    layer.on('load', function() {
+      //console.log('layer', layer);
+      var json = {
+        type: 'simple',
+        symbol: layer.renderer.toJson().defaultSymbol
+      }
       
-      var fields = res.data.fields;
-      var malette = new Malette('esri-map', {
-        style: simpleJson,
-        formatIn: 'esri-json',
-        formatOut: 'esri-json',
-        fields: fields
-      });
+      var rend = new SimpleRenderer(json);
+      layer.setRenderer(rend);
+      layer.redraw();
 
-      malette.on('style-change', function( style ){
+      $.getJSON('http://opendataqa.arcgis.com/datasets/059972b3752b490c97d20c1b99c88702_0.json', function(res) {
         
-        var rend = jsonUtils.fromJson(style);
-        layer.setRenderer(rend);
-        layer.redraw();
+        var fields = res.data.fields;
+        var malette = new Malette('esri-map', {
+          style: json,
+          formatIn: 'esri-json',
+          formatOut: 'esri-json',
+          fields: fields,
+          type: 'point'
+        });
+
+        malette.on('style-change', function( style ){
+          
+          var rend = jsonUtils.fromJson(style);
+          layer.setRenderer(rend);
+          layer.redraw();
+
+        });
 
       });
 
     });
 
   });
-
-});
             </pre>
           </code>
         </div>
@@ -220,13 +221,18 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
           $.getJSON('http://opendataqa.arcgis.com/datasets/059972b3752b490c97d20c1b99c88702_0.json', function(res) {
             
             var fields = res.data.fields;
-            var malette = new Malette('esri-map', {
+            malette = new Malette('esri-map', {
               style: json,
               formatIn: 'esri-json',
               formatOut: 'esri-json',
               fields: fields,
               type: 'point'
             });
+
+            $('#malette-size-tab').trigger('click');
+            setTimeout(function() {
+              $('#malette-graduated-size-option').trigger('click');
+            },100);
 
             malette.on('style-change', function( style ){
               

@@ -218,13 +218,18 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
           $.getJSON('http://opendata.arcgis.com/datasets/05afb060ab874b32b56b4e9cc6ad581e_2.json', function(res) {
             
             var fields = res.data.fields;
-            var malette = new Malette('esri-map', {
+            malette = new Malette('esri-map', {
               style: simpleJson,
               formatIn: 'esri-json',
               formatOut: 'esri-json',
               fields: fields
             });
+            
 
+            setTimeout(function() {
+              $('#malette-theme-color-option').trigger('click');  
+            },100);
+            
             malette.on('style-change', function( style ){
               
               var rend = jsonUtils.fromJson(style);
