@@ -35,7 +35,7 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
       $.getJSON('http://opendataqa.arcgis.com/datasets/059972b3752b490c97d20c1b99c88702_0.json', function(res) {
         
         var fields = res.data.fields;
-        var malette = new Malette('esri-map', {
+        malette = new Malette('esri-map', {
           style: json,
           formatIn: 'esri-json',
           formatOut: 'esri-json',
