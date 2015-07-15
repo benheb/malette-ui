@@ -1,0 +1,122 @@
+<!doctype html> <html class=no-js> <head> <meta charset=utf-8> <meta name=description> <meta name=viewport content="width=device-width, initial-scale=1"> <title>Malette.js | Thematic maps</title> <link rel=apple-touch-icon href=apple-touch-icon.png>  <link rel=stylesheet href=http://js.arcgis.com/3.13/esri/css/esri.css> <link rel=stylesheet type=text/css href=http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css> <link rel=stylesheet href=../malette/malette.css> <link href="http://fonts.googleapis.com/css?family=Lato" rel=stylesheet type=text/css> <link href="http://fonts.googleapis.com/css?family=Varela" rel=stylesheet type=text/css> <link rel=stylesheet href=../styles/main.css> <script src=scripts/vendor/modernizr.js></script> <script src=https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js></script> </head> <body> <!--[if lt IE 10]>
+ <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+ <![endif]--> <nav class="navbar navbar-default"> <div> <div class=navbar-header> <a href="../" class=navbar-brand>Malette</a> </div> <span class=pull-right> <ul class="nav navbar-nav"> <li><a href=../#getting-started>Getting Started</a></li> <li><a href=examples>Examples</a></li> <li><a href=../docs.html>docs</a></li> <li><a href=https://github.com/benheb/malette>Github</a></li> </ul></span></div> </nav> <div class=container id=examples> <div class=row> <div class="col-md-10 col-sm-10"> <div id=examples-content> <div id=esri-map> </div> </div> </div> <div id=examples-list class="col-md-2 col-sm-2"> <h4>Examples</h4> <ul> <li><a href=index.html> Esri Simple Renderer</a></li> <li><a href=esri-leaflet.html>Esri Leaflet</a></li> <hr> <li><a href=export.html>Exporting Styles</a></li> <hr> <li>Graduated Symbols</li> <li><i class="active-example glyphicon glyphicon-menu-right"></i><a href=examples/thematic.html>Thematic Maps</a></li> </ul> </div> </div> <div class=line> <h3>Thematic styles with Malette </h3></div> <div class="row row-break col-md-12"></div> <div class=row> <div class="example-code-block col-md-12 col-sm-12"> <code>
+            <pre>
+require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
+  var map = new Map("esri-map", {
+    center: [-75, 38.5],
+    zoom: 4,
+    basemap: "gray",
+    smartNavigation: false
+  });
+
+  map.on('load', function() {
+    map.disableScrollWheelZoom();
+  });
+
+  var layer = new FeatureLayer('http://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_ACS2013/MapServer/82', {
+    mode: FeatureLayer.MODE_ONDEMAND,
+    outFields: ['*']
+  });
+
+  map.addLayer(layer);
+
+  layer.on('load', function() {
+    var simpleJson = layer.renderer.toJson();
+    simpleJson.symbol.color = [255,255,255,100];
+    simpleJson.symbol.outline.width = 0.3;
+    simpleJson.symbol.outline.color = [255,255,255,255];
+
+    var rend = new SimpleRenderer(simpleJson);
+    layer.setRenderer(rend);
+
+    var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
+    
+    $.getJSON('http://opendata.arcgis.com/datasets/b801f4cc689f4a4eab560b842dd07954_82.json', function(res) {
+      
+      var fields = res.data.fields;
+      var malette = new Malette('esri-map', {
+        style: simpleJson,
+        formatIn: 'esri-json',
+        formatOut: 'esri-json',
+        fields: fields
+      });
+
+      malette.on('style-change', function( style ){
+        
+        var rend = jsonUtils.fromJson(style);
+        layer.setRenderer(rend);
+        layer.redraw();
+
+      });
+
+    });
+
+  });
+
+});
+            </pre>
+          </code> </div> </div> </div> <div class=footer> <p>With ♥ from the Esri DC team</p> </div>  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-64996221-1', 'auto');
+      ga('send', 'pageview');
+
+    </script> <script src=scripts/vendor.js></script> <script src=scripts/plugins.js></script> <script src="http://js.arcgis.com/3.13/"></script> <script src=../malette/malette.js></script> <script src=scripts/main.js></script> <script>
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
+        var map = new Map("esri-map", {
+          center: [-75, 38.5],
+          zoom: 4,
+          basemap: "gray",
+          smartNavigation: false
+        });
+
+        map.on('load', function() {
+          map.disableScrollWheelZoom();
+        });
+
+        var layer = new FeatureLayer('https://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/2', {
+          mode: FeatureLayer.MODE_ONDEMAND,
+          outFields: ['*']
+        });
+
+        map.addLayer(layer);
+
+        layer.on('load', function() {
+          var simpleJson = layer.renderer.toJson();
+          simpleJson.symbol.color = [220,220,220,200];
+          simpleJson.symbol.outline.width = 0.3;
+          simpleJson.symbol.outline.color = [255,255,255,255];
+
+          var rend = new SimpleRenderer(simpleJson);
+          layer.setRenderer(rend);
+
+          var renderer = new ClassBreaksRenderer(layer.renderer.symbol, "AREALAND");
+          
+          $.getJSON('http://opendata.arcgis.com/datasets/05afb060ab874b32b56b4e9cc6ad581e_2.json', function(res) {
+            
+            var fields = res.data.fields;
+            var malette = new Malette('esri-map', {
+              style: simpleJson,
+              formatIn: 'esri-json',
+              formatOut: 'esri-json',
+              fields: fields
+            });
+
+            malette.on('style-change', function( style ){
+              
+              var rend = jsonUtils.fromJson(style);
+              layer.setRenderer(rend);
+              layer.redraw();
+
+            });
+
+          });
+
+        });
+
+      });
+    </script> </body> </html>
