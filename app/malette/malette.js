@@ -98,15 +98,8 @@
     this._createElement('div', tabRegion, 'malette-stroke-tab', 'stroke', 'malette-tab');
     this._createElement('div', tabRegion, 'malette-opacity-tab', 'opacity', 'malette-tab');
 
-    //Color Ramp Handlers
-    var linkEl = document.getElementsByClassName( 'malette-tab' );
-    for(var i=0;i<linkEl.length;i++){
-      if(linkEl[i].addEventListener){
-        linkEl[i].addEventListener('click', function(e) { self._onTabClick.call(self, e) });
-      } else {
-        linkEl[i].attachEvent('onclick', function(e) { self._onTabClick.call(self, e) });
-      }
-    }
+    //toggle the tabs!! 
+    this._classEventBuilder('click', 'malette-tab', '_onTabClick' );
     
   }
 
@@ -145,22 +138,11 @@
     this.selectedExportType = this.exportFormat;
     this._generateExportStyle( this.exportFormat );
 
-    //events
-    var linkEl = document.getElementById( 'malette-export-toggle' );
-    if(linkEl.addEventListener){
-      linkEl.addEventListener('click', function(e) { self._onToggleExportUI.call(self, e) });
-    } else {
-      linkEl.attachEvent('onclick', function(e) { self._onToggleExportUI.call(self, e) });
-    }
+    //toggle export UI event handler
+    this._idEventBuilder('click', 'malette-export-toggle', '_onToggleExportUI' );
 
-    var typeLink = document.getElementsByClassName( 'export-type-toggle' );
-    for(var i=0;i<typeLink.length;i++){
-      if(typeLink[i].addEventListener){
-        typeLink[i].addEventListener('click', function(e) { self._onExportTypeChange.call(self, e) });
-      } else {
-        typeLink[i].attachEvent('onclick', function(e) { self._onExportTypeChange.call(self, e) });
-      }
-    }
+    //export type toggle 
+    this._classEventBuilder('click', 'export-type-toggle', '_onExportTypeChange' );
 
   }
 
@@ -266,50 +248,24 @@
 
     this._addColors(colorContainer, this.style.symbol.color);
 
-    //Color Ramp Handlers
-    var linkEl = document.getElementsByClassName( 'malette-color-swatch' );
-    for(var i=0;i<linkEl.length;i++){
-      if(linkEl[i].addEventListener){
-        linkEl[i].addEventListener('click', function(e) { self._onColorClick.call(self, e) });
-      } else {
-        linkEl[i].attachEvent('onclick', function(e) { self._onColorClick.call(self, e) });
-      }
-    }
+    //Color swatch events 
+    this._classEventBuilder('click', 'malette-color-swatch', '_onColorClick' );
 
-    //events
-    var themeEl = document.getElementById( 'malette-single-color-option' );
-    if(themeEl.addEventListener){
-      themeEl.addEventListener('click', function(e) { self.showSingleColorUI.call(self, e) });
-    } else {
-      themeEl.attachEvent('onclick', function(e) { self.showSingleColorUI.call(self, e) });
-    }
+    //show single colors event 
+    this._idEventBuilder('click', 'malette-single-color-option', 'showSingleColorUI' );
 
     if ( this.options.fields ) {
       this._addThemes(colorContainer);
 
-      //events
-      var themeEl = document.getElementById( 'malette-theme-color-option' );
-      if(themeEl.addEventListener){
-        themeEl.addEventListener('click', function(e) { self.showThemeUI.call(self, e) });
-      } else {
-        themeEl.attachEvent('onclick', function(e) { self.showThemeUI.call(self, e) });
-      }
+      //show ui theme event 
+      this._idEventBuilder('click', 'malette-theme-color-option', 'showThemeUI' );
 
-      var themeEl = document.getElementById( 'malette-attr-select' );
-      if(themeEl.addEventListener){
-        themeEl.addEventListener('change', function(e) { self._onAttributeChange.call(self, e) });
-      } else {
-        themeEl.attachEvent('onchange', function(e) { self._onAttributeChange.call(self, e) });
-      }
+      //theme color change event 
+      console.log('be here now');
+      this._idEventBuilder('change', 'malette-attr-select', '_onAttributeChange' );
 
-      var themeRow = document.getElementsByClassName( 'malette-theme-row' );
-      for(var i=0;i<themeRow.length;i++){
-        if(themeRow[i].addEventListener){
-          themeRow[i].addEventListener('click', function(e) { self._onThemeRowClick.call(self, e) });
-        } else {
-          themeRow[i].attachEvent('onclick', function(e) { self._onThemeRowClick.call(self, e) });
-        }
-      }
+      //on theme click handler 
+      this._classEventBuilder('click', 'malette-theme-row', '_onThemeRowClick' );
     }
 
     this._selectOption('malette-attr-select', 'selectedField');
@@ -364,39 +320,20 @@
 
     var sizeNumber = this._createElement('div', sizePalette, 'malette-size-number', 'Radius: '+size+'px', '');
     
-    //change event 
-    var linkEl = document.getElementById( 'malette-size-slider' );
-    if(linkEl.addEventListener){
-      linkEl.addEventListener('input', function(e) { self._onSizeChanged.call(self, e) });
-    } else {
-      linkEl.attachEvent('onchange', function(e) { self._onSizeChanged.call(self, e) });
-    }
+    //size slide event handler
+    this._idEventBuilder('input', 'malette-size-slider', '_onSizeChanged' );
 
-    var themeEl = document.getElementById( 'malette-single-size-option' );
-    if(themeEl.addEventListener){
-      themeEl.addEventListener('click', function(e) { self.showSingleSizeUI.call(self, e) });
-    } else {
-      themeEl.attachEvent('onclick', function(e) { self.showSingleSizeUI.call(self, e) });
-    }
+    //show single size event 
+    this._idEventBuilder('click', 'malette-single-size-option', 'showSingleSizeUI' );
 
     if ( this.options.fields ) {
       this._addGraduated(el);
 
-      //events
-      var themeEl = document.getElementById( 'malette-graduated-size-option' );
-      if(themeEl.addEventListener){
-        themeEl.addEventListener('click', function(e) { self.showGraduatedUI.call(self, e) });
-      } else {
-        themeEl.attachEvent('onclick', function(e) { self.showGraduatedUI.call(self, e) });
-      }
+      //change to graduated size event 
+      this._idEventBuilder('click', 'malette-graduated-size-option', 'showGraduatedUI' );
 
-      var themeEl = document.getElementById( 'malette-grad-attr-select' );
-      if(themeEl.addEventListener){
-        themeEl.addEventListener('change', function(e) { self._onGradAttributeChange.call(self, e) });
-      } else {
-        themeEl.attachEvent('onchange', function(e) { self._onGradAttributeChange.call(self, e) });
-      }
-
+      //change grad attr 
+      this._idEventBuilder('change', 'malette-grad-attr-select', '_onGradAttributeChange' );
     }
 
     this._selectOption('malette-grad-attr-select', 'selectedField');
@@ -434,23 +371,11 @@
 
     this._addColors( el, this.style.symbol.outline.color );
 
-    //change event 
-    var linkEl = document.getElementById( 'malette-stroke-slider' );
-    if(linkEl.addEventListener){
-      linkEl.addEventListener('input', function(e) { self._onStrokeWidthChanged.call(self, e) });
-    } else {
-      linkEl.attachEvent('onchange', function(e) { self._onStrokeWidthChanged.call(self, e) });
-    }
+    //stroke width change event
+    this._idEventBuilder('input', 'malette-stroke-slider', '_onStrokeWidthChanged' );
 
-    //Color Ramp Handlers
-    var linkEl = document.getElementsByClassName( 'malette-color-swatch' );
-    for(var i=0;i<linkEl.length;i++){
-      if(linkEl[i].addEventListener){
-        linkEl[i].addEventListener('click', function(e) { self._onStrokeColorClick.call(self, e) });
-      } else {
-        linkEl[i].attachEvent('onclick', function(e) { self._onStrokeColorClick.call(self, e) });
-      }
-    }
+    //Color events 
+    this._classEventBuilder('click', 'malette-color-swatch', '_onStrokeColorClick' );
 
   }
 
@@ -480,14 +405,8 @@
     var sizeNumber = this._createElement('div', el, 'malette-opacity-number', 'Opacity: '+(opacity * 100)+'%', '');
     el.appendChild( sizeNumber );
 
-    //change event 
-    var linkEl = document.getElementById( 'malette-opacity-slider' );
-    if(linkEl.addEventListener){
-      linkEl.addEventListener('input', function(e) { self._onOpacityChanged.call(self, e) });
-    } else {
-      linkEl.attachEvent('onchange', function(e) { self._onOpacityChanged.call(self, e) });
-    }
-
+    //opacity change event
+    this._idEventBuilder('input', 'malette-opacity-slider', '_onOpacityChanged' );
   }
 
 
@@ -539,6 +458,39 @@
     }
   }
 
+
+
+  Malette.prototype._classEventBuilder = function(eventName, className, fnName ) {
+    console.log('class event builder!');
+    var self = this; 
+    
+    var linkEl = document.getElementsByClassName( className );
+    for(var i=0;i<linkEl.length;i++){
+      if(linkEl[i].addEventListener){
+        linkEl[i].addEventListener( eventName , function(e) { self[ fnName ].call(self, e) });
+      } else {
+        linkEl[i].attachEvent('on'+eventName, function(e) { self[ fnName ].call(self, e) });
+      }
+    }
+
+  }
+
+
+  Malette.prototype._idEventBuilder = function(eventName, id, fnName ) {
+    console.log('id event builder!');
+    var self = this; 
+    
+    var linkEl = document.getElementById( id );
+    if(linkEl.addEventListener){
+      linkEl.addEventListener(eventName, function(e) { self[ fnName ].call(self, e) });
+    } else {
+      linkEl.attachEvent('on'+eventName, function(e) { self[ fnName ].call(self, e) });
+    }
+
+  }
+
+
+
   /************* METHODS **************/
 
 
@@ -588,6 +540,7 @@
   Malette.prototype.setTheme = function(ramp, field) {
     
     this.state.selectedField = ( field ) ? field : this.state.selectedField; 
+    //console.log('this.state.selectedField', this.state.selectedField);
 
     //default theme map 
     if ( !ramp && !this.selectedRamp ) {
@@ -779,7 +732,11 @@
     document.getElementById('malette-single-color-option').className = 'malette-option-toggle';
     document.getElementById('malette-theme-color-option').className = 'malette-option-toggle malette-option-toggle-selected';
     this.state._isTheme = true;
-    this.setTheme();
+
+    var index = document.getElementById('malette-attr-select').selectedIndex;
+    var field = document.getElementById('malette-attr-select')[index].innerHTML;
+    
+    this.setTheme(null, field);
   }
 
 
