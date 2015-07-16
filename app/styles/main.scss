@@ -98,7 +98,17 @@ body,html {
 
 #map {
   width:100%;
-  height:380px;
+  height:390px;
+  position: relative;
+}
+
+#map {
+  #malette-export-container {
+    height:125px;
+  }
+  #export-code-block {
+    height:75px;
+  }
 }
 
 .section {

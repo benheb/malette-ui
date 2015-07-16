@@ -270,7 +270,7 @@
 
     this._selectOption('malette-attr-select', 'selectedField');
 
-    if ( this.state._isTheme ) {
+    if ( this.state._isTheme || this.style.visualVariables ) {
       self.showThemeUI();
     }
 
@@ -431,7 +431,8 @@
   Malette.prototype._createAttributeSelect = function() {
     var select = document.createElement('select');
     for (var i = 0; i < this.options.fields.length; i++) { 
-      if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' ) {
+      if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' 
+        || this.options.fields[i].type === 'esriFieldTypeSingle' ) {
         if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
           var option = document.createElement('option');
           option.setAttribute('value', this.options.fields[i].type);
@@ -538,18 +539,29 @@
 
 
   Malette.prototype.setTheme = function(ramp, field) {
-    
+    var self = this;
+
     this.state.selectedField = ( field ) ? field : this.state.selectedField; 
     //console.log('this.state.selectedField', this.state.selectedField);
 
     //default theme map 
     if ( !ramp && !this.selectedRamp ) {
-      ramp = [[255,247,251,130],[236,226,240,130],[208,209,230,130],[166,189,219,130],[103,169,207,130],[54,144,192,130],[2,129,138,130],[1,100,80,130]];
+      ramp = [[255,247,251, this.state.fillOpacity],[236,226,240, this.state.fillOpacity],
+        [208,209,230, this.state.fillOpacity],[166,189,219, this.state.fillOpacity],[103,169,207, this.state.fillOpacity],
+        [54,144,192, this.state.fillOpacity],[2,129,138,130],[1,100,80, this.state.fillOpacity]];
     } else if ( !ramp && this.selectedRamp ) {
       ramp = this.selectedRamp;
     }
     
     this.selectedRamp = (ramp) ? ramp : this.selectedRamp;
+
+    console.log('here', this.state.fillOpacity);
+    //set opacity on ramp colors
+    this.selectedRamp.forEach(function(color, i) {
+      console.log('self.state.fillOpacity', self.state.fillOpacity);
+      self.selectedRamp[ i ][ 3 ] = self.state.fillOpacity;
+    });
+    console.log('post here', this.selectedRamp);
     
     var values = this.classify( this.state.selectedField );
     
@@ -560,42 +572,42 @@
         "stops":  [
             {
               "value": values[0],
-              "color": ramp[0],
+              "color": this.selectedRamp[0],
               "label": null
             },
             {
               "value": values[1],
-              "color": ramp[1],
+              "color": this.selectedRamp[1],
               "label": null
             },
             {
               "value": values[2],
-              "color": ramp[2],
+              "color": this.selectedRamp[2],
               "label": null
             },
             {
               "value": values[3],
-              "color": ramp[3],
+              "color": this.selectedRamp[3],
               "label": null
             },
             {
               "value": values[4],
-              "color": ramp[4],
+              "color": this.selectedRamp[4],
               "label": null
             },
             {
               "value": values[5],
-              "color": ramp[5],
+              "color": this.selectedRamp[5],
               "label": null
             },
             {
               "value": values[6],
-              "color": ramp[6],
+              "color": this.selectedRamp[6],
               "label": null
             },
             {
               "value": values[7],
-              "color": ramp[7],
+              "color": this.selectedRamp[7],
               "label": null
             }
         ]
@@ -879,6 +891,8 @@
     el.innerHTML = 'Opacity: ' + (opacity*100) + '%';
     if ( this.state._isGraduated ) {
       this.setGraduated();
+    } else if ( this.state._isTheme ) {
+      this.setTheme();
     } else {
       this.updateStyle();
     }
@@ -895,6 +909,8 @@
 
   Malette.prototype._rgbaToDojoColor = function(c, opacity) {
     var color;
+    if ( !opacity ) opacity = 255;
+
     if ( Array.isArray(c) ) {
       color = c;
       color[3] = opacity;
