@@ -69,12 +69,14 @@
 .malette-option-toggle {
   float: left;
   border: 1px solid #EEE;
+  background: #EEE;
   border-radius: 1px;
   padding:5px;
   font-size: 0.8em;
   margin-right: 5px;
   padding-top:2px;
   padding-bottom: 2px;
+  border-bottom: 1px solid #FFF;
 }
 
 .malette-option-toggle:hover {
@@ -87,7 +89,7 @@
 }
 
 .malette-option-toggle-selected {
-  background: #EEE;
+  background: #FFF;
 }
 
 #malette-color-palette, #malette-theme-palette {
@@ -100,7 +102,7 @@
 
 .malette-color-swatch {
   width: 26px;
-  height: 18px;
+  height: 17.5px;
   border: 1px solid #EEE;
   float: left;
   margin: 1px;
@@ -120,7 +122,7 @@
 
 .malette-color-swatch-selected {
   width: 26px;
-  height: 18px;
+  height: 17px;
   border: 1px solid #EEE;
   margin: 1px;
   position: absolute;
@@ -139,7 +141,7 @@
 
 .malette-theme-swatch {
   width: 28.2px;
-  height: 18px;
+  height: 17px;
   border: none;
   float: left;
   margin: 0px;
@@ -166,6 +168,7 @@
   width:175px;
   float: left;
   margin-top:10px;
+  margin-bottom: 1px;
 }
 
 #malette-stroke-width {
@@ -176,13 +179,19 @@
   margin-right: 8px;
 }
 
+#malette-export-toggle-text {
+  color:#888;
+}
+
 #malette-export-toggle-container {
   font-size: 0.8em;
   text-transform: none;
   display: inline-block;
-  float:right;
   font-weight: 400;
-  margin-top:-3px;
+  margin-top: 0px;
+  position: absolute;
+  right: 13px;
+  bottom: 1px;
 }
 
 #malette-export-toggle-container input {
@@ -194,7 +203,7 @@
   height: 200px;
   background-color: #FFF;
   position: absolute;
-  margin-top: -5px;
+  margin-top: -3px;
   z-index: 1000;
   border-top: 1px solid #EEE;
   width: 300px;

@@ -113,11 +113,14 @@
   Malette.prototype._addExporter = function() {
     var self = this;
 
-    var container = document.getElementById('malette-header');
-    var el = this._createElement('div', container, 'malette-export-toggle-container', 'Export style', '');
+    var container = document.getElementById('malette-content');
+    var el = this._createElement('div', container, 'malette-export-toggle-container', '', '');
+    var span = this._createElement('span', el, 'malette-export-toggle-text', 'Show JSON', '');
     var toggle = this._createElement('input', el, 'malette-export-toggle', '', '');
     toggle.type = 'checkbox';
-    //toggle.checked = true;
+    if ( this._isShowJson ) {
+      toggle.checked = true;
+    }
 
     var content = document.getElementById('malette');
     var exporter = this._createElement('div', content, 'malette-export-container', '', '');
@@ -516,6 +519,9 @@
         this._constructColorRegion(el);
     }
 
+    if ( this.options.exportStyle ) {
+      this._addExporter();
+    }
   }
 
 
@@ -789,8 +795,12 @@
   Malette.prototype.toggleExportUI = function(e) {
     if ( e.target.checked === true ) {
       document.getElementById("malette-export-container").style.visibility = "visible";
+      document.getElementById('malette-export-toggle-text').innerHTML = 'Hide JSON';
+      this._isShowJson = true;
     } else {
       document.getElementById("malette-export-container").style.visibility = "hidden";
+      document.getElementById('malette-export-toggle-text').innerHTML = 'Show JSON';
+      this._isShowJson = false;
     }
   }
 
