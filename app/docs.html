@@ -106,6 +106,50 @@
                 </tr>
               </tbody>
             </table>
+            <div class="row row-break col-md-12"></div>
+            <h2>Thematic and Graduated Styles</h2>
+            <table class="table">
+              <thead>
+                <th>Required</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th>Description</th>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>fields</td>
+                  <td>{array}</td>
+                  <td></td>
+                  <td>Array of possible fields to style on.</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="row">
+              <div class="col-md-12">
+                <span class="blurb"> 
+                  The fields requirement is an array of attributes on a layer with statistics for that field, i.e.: 
+                </span>
+                <code>
+<pre>
+  fields = [
+    {
+      alias: 'fieldNameAlias',
+      name: 'name',
+      statistics: {
+        avg: 100,
+        min: 10,
+        max: 500,
+        stddev: 1.2
+        var: 3
+      }
+      type: 'esriFieldTypeDouble'
+    },
+    { ... }
+  ]
+</pre>
+                </code>
+              </div>
+            </div>
             <h2>Events</h2>
             <table class="table">
               <thead>

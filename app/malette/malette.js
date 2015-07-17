@@ -85,7 +85,7 @@
   /*
   * Builds the navigation tabs 
   * Default: Color, Size
-  *
+  * @param {String} el    Builds UI for navigation tabs 
   */
   Malette.prototype._addTabs = function(el) {
     var self = this;
@@ -107,7 +107,7 @@
 
   /*
   * Exporter UI 
-  *
+  * 
   *
   */
   Malette.prototype._addExporter = function() {
@@ -155,7 +155,8 @@
   /*
   * Color swatch UI generator 
   * Used both in fill and stroke color UI 
-  * Required {}
+  * @param {String} el    parenet element 
+  * @param {String} selectedColor    currently selected color rgba 
   */ 
   Malette.prototype._addColors = function(el, selectedColor) {
     var swatch;
@@ -186,11 +187,12 @@
 
 
   /*
-  * Color swatch UI generator 
-  * Used both in fill and stroke color UI 
-  * Required {}
+  * Color theme UI generator 
+  * creates color ramps 
+  * @param {String} el    parenet element 
+  * @param {String} 
   */ 
-  Malette.prototype._addThemes = function(el, selectedColor) {
+  Malette.prototype._addThemes = function(el) {
     var self = this;
     var swatch;
 
@@ -230,8 +232,8 @@
 
 
   /*
-  * Color tab UI 
-  *
+  * Creates the color tab UI
+  * @param {String} el   Parent element to append the color UI 
   *
   */
   Malette.prototype._constructColorRegion = function(el) {
@@ -264,7 +266,6 @@
       this._idEventBuilder('click', 'malette-theme-color-option', 'showThemeUI' );
 
       //theme color change event 
-      console.log('be here now');
       this._idEventBuilder('change', 'malette-attr-select', '_onAttributeChange' );
 
       //on theme click handler 
@@ -274,6 +275,10 @@
     this._selectOption('malette-attr-select', 'selectedField');
 
     if ( this.state._isTheme || this.style.visualVariables ) {
+      if ( this.style.visualVariables ) {
+        this.state.selectedField = this.style.visualVariables[ 0 ].field;
+        this._selectOption('malette-attr-select', 'selectedField');
+      }
       self.showThemeUI();
     }
 
@@ -281,7 +286,11 @@
 
 
 
-
+  /*
+  * Creates UI for graduated symbols; only called if fields exist 
+  * @param {String} el   Parent element to append the graduated ui to 
+  *
+  */
   Malette.prototype._addGraduated = function(el) {
     var select = this._createAttributeSelect();
     var graduatedPaletteContainer = this._createElement('div', el, 'malette-graduated-palette', '', '');
@@ -293,8 +302,8 @@
 
 
   /*
-  * Size tab UI
-  *
+  * Creates the size tab UI
+  * @param {String} el   Parent element to append the size UI 
   *
   */
   Malette.prototype._constructSizePalette = function(el) {
@@ -341,7 +350,11 @@
 
     this._selectOption('malette-grad-attr-select', 'selectedField');
     
-    if ( this.state._isGraduated ) {
+    if ( this.state._isGraduated || this.style.classBreakInfos ) {
+      if ( this.style.classBreakInfos ) {
+        this.state.selectedField = this.style.field;
+        this._selectOption('malette-grad-attr-select', 'selectedField');
+      }
       self.showGraduatedUI();
     }
 
@@ -350,8 +363,8 @@
 
 
   /*
-  * Stroke tab UI
-  *
+  * Creates the stroke tab UI
+  * @param {String} el   Parent element to append the stroke UI 
   *
   */
   Malette.prototype._constructStrokePalette = function(el) {
@@ -386,8 +399,8 @@
 
 
   /*
-  * Opacity tab UI
-  *
+  * Creates the opacity tab UI
+  * @param {String} el   Parent element to append the opacity UI 
   *
   */
   Malette.prototype._constructOpacityPalette = function(el) {
@@ -417,7 +430,11 @@
 
   /*
   * creates a generic element, and appends to 'parent' div 
-  *
+  * @param {String}   type of HTML element to create 
+  * @param {String}   parent element to append created element to 
+  * @param {String}   id of newly created element 
+  * @param {String}   any text one wishes to append to new element 
+  * @param {String}   optional classname for new element 
   */
   Malette.prototype._createElement = function(type, parent, id, html, className ) {
 
@@ -431,6 +448,12 @@
 
 
 
+
+  /*
+  * Builds a generic attribute select drop down 
+  * Requires this.options.fields be defined; 
+  *
+  */
   Malette.prototype._createAttributeSelect = function() {
     var select = document.createElement('select');
     for (var i = 0; i < this.options.fields.length; i++) { 
@@ -445,10 +468,18 @@
         }
       }
     }
+
     return select;
   }
 
 
+
+  /*
+  * Programatically select an option in dropdown 
+  * @param {String}     id - id of select element 
+  * @param {String}     field - value of select option 
+  *
+  */
   Malette.prototype._selectOption = function(id, field) {
     if ( this.state[ field ] ) {
       var index = 0;
@@ -464,8 +495,14 @@
 
 
 
+  /*
+  * Event builder for classes 
+  * @param {String}     eventName, type of event 
+  * @param {String}     className, what element class are we binding to
+  * @param {String}     fnName, what action (function to call) when event fires 
+  *
+  */
   Malette.prototype._classEventBuilder = function(eventName, className, fnName ) {
-    console.log('class event builder!');
     var self = this; 
     
     var linkEl = document.getElementsByClassName( className );
@@ -480,8 +517,15 @@
   }
 
 
+
+  /*
+  * Event builder for ids 
+  * @param {String}     eventName, type of event 
+  * @param {String}     id, what element are we binding to
+  * @param {String}     fnName, what action (function to call) when event fires 
+  *
+  */
   Malette.prototype._idEventBuilder = function(eventName, id, fnName ) {
-    console.log('id event builder!');
     var self = this; 
     
     var linkEl = document.getElementById( id );
@@ -561,13 +605,11 @@
     
     this.selectedRamp = (ramp) ? ramp : this.selectedRamp;
 
-    console.log('here', this.state.fillOpacity);
     //set opacity on ramp colors
     this.selectedRamp.forEach(function(color, i) {
       console.log('self.state.fillOpacity', self.state.fillOpacity);
       self.selectedRamp[ i ][ 3 ] = self.state.fillOpacity;
     });
-    console.log('post here', this.selectedRamp);
     
     var values = this.classify( this.state.selectedField );
     
@@ -1015,8 +1057,8 @@
 
     if ( type === 'esri-json' ) {
 
-      console.log('this.style.symbol.color', this.style.symbol.color);
-      console.log('fillOpacity', this.state.fillOpacity);
+      //console.log('this.style.symbol.color', this.style.symbol.color);
+      //console.log('fillOpacity', this.state.fillOpacity);
 
       this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.state.fillOpacity ); //change colors BACK to dojo :(
       this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
@@ -1074,7 +1116,6 @@
     var field = document.getElementById('malette-attr-select')[index].innerHTML;
     this.state.selectedField = field;
     this.setTheme(null, field);
-    console.log('on attr change!', this._isGraduated);
 
     if ( this.state._isGraduated ) {
       this.setGraduated(field);

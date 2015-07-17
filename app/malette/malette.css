@@ -218,6 +218,7 @@
   font-size: 0.8em;
   overflow: hidden;
   padding:5px;
+  pointer-events:auto;
 }
 
 #malette-export-header input {
