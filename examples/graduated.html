@@ -1,6 +1,6 @@
-<!doctype html> <html class=no-js> <head> <meta charset=utf-8> <meta name=description> <meta name=viewport content="width=device-width, initial-scale=1"> <title>Malette.js | Thematic maps</title> <link rel=apple-touch-icon href=apple-touch-icon.png>  <link rel=stylesheet href=http://js.arcgis.com/3.13/esri/css/esri.css> <link rel=stylesheet type=text/css href=http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css> <link rel=stylesheet href=../malette/malette.css> <link href="http://fonts.googleapis.com/css?family=Lato" rel=stylesheet type=text/css> <link href="http://fonts.googleapis.com/css?family=Varela" rel=stylesheet type=text/css> <link rel=stylesheet href=../styles/main.css> <script src=scripts/vendor/modernizr.js></script> <script src=https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js></script> </head> <body> <!--[if lt IE 10]>
+<!doctype html> <html class=no-js> <head> <meta charset=utf-8> <meta name=description> <meta name=viewport content="width=device-width, initial-scale=1"> <title>Malette.js | Graduated symbols</title> <link rel=apple-touch-icon href=apple-touch-icon.png>  <link rel=stylesheet href=http://js.arcgis.com/3.13/esri/css/esri.css> <link rel=stylesheet type=text/css href=http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css> <link rel=stylesheet href=../malette/malette.css> <link href="http://fonts.googleapis.com/css?family=Lato" rel=stylesheet type=text/css> <link href="http://fonts.googleapis.com/css?family=Varela" rel=stylesheet type=text/css> <link rel=stylesheet href=../styles/main.css> <script src=scripts/vendor/modernizr.js></script> <script src=https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js></script> </head> <body> <!--[if lt IE 10]>
  <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
- <![endif]--> <nav class="navbar navbar-default"> <div> <div class=navbar-header> <a href="../" class=navbar-brand>Malette</a> </div> <span class=pull-right> <ul class="nav navbar-nav"> <li><a href=../#getting-started>Getting Started</a></li> <li><a href=examples>Examples</a></li> <li><a href=../docs.html>docs</a></li> <li><a href=https://github.com/benheb/malette>Github</a></li> </ul></span></div> </nav> <div class=container id=examples> <div class=row> <div class="col-md-10 col-sm-10"> <div id=examples-content> <div id=esri-map> </div> </div> </div> <div id=examples-list class="col-md-2 col-sm-2"> <h4>Examples</h4> <ul> <li><a href=index.html> Esri Simple Renderer</a></li> <li><a href=esri-leaflet.html>Esri Leaflet</a></li> <hr> <li><a href=export.html>Exporting Styles</a></li> <hr> <li><i class="active-example glyphicon glyphicon-menu-right"></i> <a href=examples/graduated.html>Graduated Symbols</a></li> <li><a href=thematic.html>Thematic Maps</a></li> </ul> </div> </div> <div class=line> <h3>Graduated Symbols </h3></div> <div class="row row-break col-md-12"></div> <div class=row> <div class="example-code-block col-md-12 col-sm-12"> <code>
+ <![endif]--> <nav class="navbar navbar-default"> <div> <div class=navbar-header> <a href="../" class=navbar-brand>Malette</a> </div> <span class=pull-right> <ul class="nav navbar-nav"> <li><a href=../#getting-started>Getting Started</a></li> <li><a href=../examples>Examples</a></li> <li><a href=../docs.html>docs</a></li> <li><a href=https://github.com/benheb/malette>Github</a></li> </ul></span></div> </nav> <div class=container id=examples> <div class=row> <div class="col-md-10 col-sm-10"> <div id=examples-content> <div id=esri-map> </div> </div> </div> <div id=examples-list class="col-md-2 col-sm-2"> <h4>Examples</h4> <ul> <li><a href=index.html> Esri Simple Renderer</a></li> <li><a href=esri-leaflet.html>Esri Leaflet</a></li> <hr> <li><a href=export.html>Exporting Styles</a></li> <hr> <li><i class="active-example glyphicon glyphicon-menu-right"></i> <a href=examples/graduated.html>Graduated Symbols</a></li> <li><a href=thematic.html>Thematic Maps</a></li> </ul> </div> </div> <div class=line> <h3>Graduated Symbols </h3></div> <div class="row row-break col-md-12"></div> <div class=row> <div class="example-code-block col-md-12 col-sm-12"> <code>
             <pre>
 require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
     var map = new Map("esri-map", {
@@ -89,8 +89,186 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
         layer.on('load', function() {
           //console.log('layer', layer);
           var json = {
-            type: 'simple',
-            symbol: layer.renderer.toJson().defaultSymbol
+            "type": "classBreaks",
+            "symbol": {
+              "color": [
+                78,
+                179,
+                211,
+                229.5
+              ],
+              "size": 4,
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "type": "esriSMS",
+              "style": "esriSMSCircle",
+              "outline": {
+                "color": [
+                  82,
+                  82,
+                  82,
+                  255
+                ],
+                "width": 0.5,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              }
+            },
+            "field": "numfatal",
+            "minValue": 1,
+            "classBreakInfos": [
+              {
+                "symbol": {
+                  "color": {
+                    "r": 78,
+                    "g": 179,
+                    "b": 211,
+                    "a": 0.9
+                  },
+                  "size": 5.333333333333333,
+                  "type": "simplemarkersymbol",
+                  "style": "circle",
+                  "outline": {
+                    "color": {
+                      "r": 82,
+                      "g": 82,
+                      "b": 82,
+                      "a": 1
+                    },
+                    "width": 0.6666666666666666,
+                    "type": "simplelinesymbol",
+                    "style": "solid"
+                  },
+                  "xoffset": 0,
+                  "yoffset": 0
+                },
+                "label": 1,
+                "classMaxValue": 1,
+                "minValue": 1,
+                "maxValue": 1
+              },
+              {
+                "symbol": {
+                  "color": {
+                    "r": 78,
+                    "g": 179,
+                    "b": 211,
+                    "a": 0.9
+                  },
+                  "size": 13.333333333333332,
+                  "type": "simplemarkersymbol",
+                  "style": "circle",
+                  "outline": {
+                    "color": {
+                      "r": 82,
+                      "g": 82,
+                      "b": 82,
+                      "a": 1
+                    },
+                    "width": 0.6666666666666666,
+                    "type": "simplelinesymbol",
+                    "style": "solid"
+                  },
+                  "xoffset": 0,
+                  "yoffset": 0
+                },
+                "label": "> 1 to 1.5",
+                "classMaxValue": 1.5,
+                "minValue": 1,
+                "maxValue": 1.5
+              },
+              {
+                "symbol": {
+                  "color": {
+                    "r": 78,
+                    "g": 179,
+                    "b": 211,
+                    "a": 0.9
+                  },
+                  "size": 21.333333333333332,
+                  "type": "simplemarkersymbol",
+                  "style": "circle",
+                  "outline": {
+                    "color": {
+                      "r": 82,
+                      "g": 82,
+                      "b": 82,
+                      "a": 1
+                    },
+                    "width": 0.6666666666666666,
+                    "type": "simplelinesymbol",
+                    "style": "solid"
+                  },
+                  "xoffset": 0,
+                  "yoffset": 0
+                },
+                "label": "> 1.5 to 2",
+                "classMaxValue": 2,
+                "minValue": 1.5,
+                "maxValue": 2
+              },
+              {
+                "symbol": {
+                  "color": {
+                    "r": 78,
+                    "g": 179,
+                    "b": 211,
+                    "a": 0.9
+                  },
+                  "size": 29.333333333333332,
+                  "type": "simplemarkersymbol",
+                  "style": "circle",
+                  "outline": {
+                    "color": {
+                      "r": 82,
+                      "g": 82,
+                      "b": 82,
+                      "a": 1
+                    },
+                    "width": 0.6666666666666666,
+                    "type": "simplelinesymbol",
+                    "style": "solid"
+                  },
+                  "xoffset": 0,
+                  "yoffset": 0
+                },
+                "label": "> 2 to 2.5",
+                "classMaxValue": 2.5,
+                "minValue": 2,
+                "maxValue": 2.5
+              },
+              {
+                "symbol": {
+                  "color": {
+                    "r": 78,
+                    "g": 179,
+                    "b": 211,
+                    "a": 0.9
+                  },
+                  "size": 40,
+                  "type": "simplemarkersymbol",
+                  "style": "circle",
+                  "outline": {
+                    "color": {
+                      "r": 82,
+                      "g": 82,
+                      "b": 82,
+                      "a": 1
+                    },
+                    "width": 0.6666666666666666,
+                    "type": "simplelinesymbol",
+                    "style": "solid"
+                  },
+                  "xoffset": 0,
+                  "yoffset": 0
+                },
+                "label": "> 2.5 to 3",
+                "classMaxValue": 3,
+                "minValue": 2.5,
+                "maxValue": 3
+              }
+            ]
           }
           
           var rend = new SimpleRenderer(json);
@@ -108,9 +286,8 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
               type: 'point'
             });
 
-            $('#malette-size-tab').trigger('click');
             setTimeout(function() {
-              $('#malette-graduated-size-option').trigger('click');
+              $('#malette-size-tab').trigger('click');
             },100);
 
             malette.on('style-change', function( style ){
