@@ -120,7 +120,8 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
         style: simpleJson,
         formatIn: 'esri-json',
         formatOut: 'esri-json',
-        fields: fields
+        fields: fields,
+        type: 'polygon'
       });
 
       malette.on('style-change', function( style ){
@@ -223,7 +224,8 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
               style: simpleJson,
               formatIn: 'esri-json',
               formatOut: 'esri-json',
-              fields: fields
+              fields: fields,
+              type: 'polygon'
             });
             
 

@@ -85,8 +85,8 @@
             <pre>
 require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
     var map = new Map("esri-map", {
-      center: [-118, 34.5],
-      zoom: 7,
+      center: [-122, 47.3],
+      zoom: 8,
       basemap: "gray",
       smartNavigation: false
     });
@@ -95,7 +95,7 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
       map.disableScrollWheelZoom();
     });
 
-    var layer = new FeatureLayer('http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/2012_CA_NHTSA/FeatureServer/0', {
+    var layer = new FeatureLayer('https://services2.arcgis.com/1UvBaQ5y1ubjUPmd/arcgis/rest/services/River_Routes/FeatureServer/0', {
       mode: FeatureLayer.MODE_ONDEMAND,
       outFields: ['*']
     });
@@ -103,34 +103,24 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
     map.addLayer(layer);
 
     layer.on('load', function() {
-      //console.log('layer', layer);
+      
       var json = {
         type: 'simple',
-        symbol: layer.renderer.toJson().defaultSymbol
+        symbol: layer.renderer.toJson().symbol
       }
-      
-      var rend = new SimpleRenderer(json);
-      layer.setRenderer(rend);
-      layer.redraw();
 
-      $.getJSON('http://opendataqa.arcgis.com/datasets/059972b3752b490c97d20c1b99c88702_0.json', function(res) {
+      malette = new Malette('esri-map', {
+        style: json,
+        formatIn: 'esri-json',
+        formatOut: 'esri-json',
+        type: 'line'
+      });
+
+      malette.on('style-change', function( style ){
         
-        var fields = res.data.fields;
-        malette = new Malette('esri-map', {
-          style: json,
-          formatIn: 'esri-json',
-          formatOut: 'esri-json',
-          fields: fields,
-          type: 'point'
-        });
-
-        malette.on('style-change', function( style ){
-          
-          var rend = jsonUtils.fromJson(style);
-          layer.setRenderer(rend);
-          layer.redraw();
-
-        });
+        var rend = jsonUtils.fromJson(style);
+        layer.setRenderer(rend);
+        layer.redraw();
 
       });
 
@@ -209,7 +199,6 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
         map.addLayer(layer);
 
         layer.on('load', function() {
-          console.log('layer', layer.renderer.toJson());
           
           var json = {
             type: 'simple',
