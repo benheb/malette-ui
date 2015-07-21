@@ -38,5 +38,15 @@
         "single"
       ]
     }
+  },
+  "dependencies": {
+    "gulp-gh-pages": "^0.5.2",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.13.2",
+    "karma-jasmine": "^0.3.6",
+    "karma-phantomjs-launcher": "^0.2.0",
+    "karma-beep-reporter": "^0.1.4",
+    "karma-chrome-launcher": "^0.2.0",
+    "phantomjs": "^1.9.17"
   }
 }

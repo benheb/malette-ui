@@ -5,17 +5,96 @@ import browserSync from 'browser-sync';
 import del from 'del';
 import {stream as wiredep} from 'wiredep';
 import ghPages from 'gulp-gh-pages';
+var Server = require('karma').Server;
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
 gulp.task('deploy', function() {
   return gulp.src('./dist/**/*')
-    .pipe(ghPages({
-        remoteUrl: "git@github.com:benheb/benheb.github.io.git",
-        branch: 'master'
-      }
-    ));
+    .pipe(ghPages());
+});
+
+// run mocha tests
+gulp.task('test', function (done) {
+  // TODO: get karmaConfig...
+  var karmaConfig = {
+    // base path that will be used to resolve all patterns (eg. files, exclude)
+    //basePath: '../',
+ 
+    // frameworks to use
+    // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
+    frameworks: [ 'jasmine' ],
+ 
+    // list of files / patterns to load in the browser
+    files: [
+ 
+      //dependencies
+      
+      './bower_components/jquery/dist/jquery.js',
+ 
+      //helpers
+      //'./spec/helpers/**/*.js',
+ 
+      //fixtures
+      //{ pattern: './spec/fixtures/**/*.*', included: false, served: true },
+ 
+      //incidental stuff (ace, images)
+      //{ pattern: './app/images/**/*.*', included: false, served: true },
+      //{ pattern: './app/scripts/lib/**/*.js', included: false, served: true }
+
+      //testing files
+      './app/malette/**/*.js',
+
+      //tests
+      './spec/**/*.js'
+
+    ],
+ 
+    // list of files to exclude
+    // do not include spec.js files directly - things get weird
+    exclude: [
+    
+    ],
+ 
+    // test results reporter to use
+    // possible values: 'dots', 'progress'
+    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
+    reporters: ['dots', 'beep'],
+    
+    // web server port
+    port: 9876,
+ 
+    // enable / disable colors in the output (reporters and logs)
+    colors: true,
+ 
+    captureTimeout: 60000,
+    browserDisconnectTimeout : 10000, // default 2000
+    browserDisconnectTolerance : 1, // default 0
+    browserNoActivityTimeout : 60000, //default 10000
+ 
+    // level of logging
+    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    logLevel: 'INFO',
+ 
+    reportSlowerThan: 200,
+ 
+    // enable / disable watching file and executing tests whenever any file changes
+    autoWatch: false,
+ 
+    // start these browsers
+    // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
+    browsers: ['PhantomJS'],
+    //browsers: ['Chrome'],
+ 
+    // Continuous Integration mode
+    // if true, Karma captures browsers, runs the tests and exits
+    singleRun: true
+  }
+ 
+  //huck it at karma and hope for the best
+  new Server(karmaConfig, done).start();
+  //karma.start(karmaConfig, function (exitStatus) { done(); });
 });
 
 gulp.task('styles', () => {
@@ -131,6 +210,10 @@ gulp.task('examples', ['styles'], () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
+gulp.task('watch', function() {
+  gulp.watch([ './spec/**/*.js', './app/malette/**/*.js' ], [ 'test' ]);
+});
+
 gulp.task('serve', ['styles', 'fonts'], () => {
   browserSync({
     notify: false,
@@ -149,7 +232,8 @@ gulp.task('serve', ['styles', 'fonts'], () => {
     'app/malette/**/*.js',
     'app/examples/*.html',
     'app/images/**/*',
-    '.tmp/fonts/**/*'
+    '.tmp/fonts/**/*',
+    'spec/test.js'
   ]).on('change', reload);
 
   gulp.watch('app/styles/**/*.scss', ['styles']);

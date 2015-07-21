@@ -922,7 +922,7 @@
   Malette.prototype.setSelectedSize = function(size) {
     this.style.symbol.size = parseInt(size);
     var el = document.getElementById( 'malette-size-number' );
-    el.innerHTML = 'Radius: ' + size + 'px';
+    this._setInnerHTML(el, 'Radius: ' + size + 'px');
     this.updateStyle();
   }
 
@@ -934,9 +934,9 @@
     } else {
       this.style.symbol.width = parseFloat(width);
     }
-    
+
     var el = document.getElementById( 'malette-stroke-width' );
-    el.innerHTML = width + 'px';
+    this._setInnerHTML(el, width + 'px');
     
     if ( this.state._isGraduated ) {
       this.setGraduated();
@@ -955,7 +955,8 @@
   Malette.prototype.setOpacity = function(opacity) {
     this.state.fillOpacity = parseFloat(opacity) * 255;
     var el = document.getElementById( 'malette-opacity-number' );
-    el.innerHTML = 'Opacity: ' + (opacity*100) + '%';
+    this._setInnerHTML(el, 'Opacity: ' + (opacity*100) + '%');
+
     if ( this.state._isGraduated ) {
       this.setGraduated();
     } else if ( this.state._isTheme ) {
@@ -963,6 +964,12 @@
     } else {
       this.updateStyle();
     }
+  }
+
+
+
+  Malette.prototype._setInnerHTML = function(el, html) {
+    el.innerHTML = html;
   }
 
 
