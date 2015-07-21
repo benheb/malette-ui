@@ -20,6 +20,7 @@
     this.state = {};
     this.state._isGraduated = false;
     this.state._isTheme = false;
+    this.state.type = (options.type) ? options.type.toLowerCase() : 'point';
 
     //style params 
     this.format = options.formatIn || 'esri-json';
@@ -31,7 +32,10 @@
         this.style = options.style || {};
         this.state.fillOpacity = this.style.symbol.color[3];
         this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc\
-        this.style.symbol.outline.color = this._dojoColorToRgba( this.style.symbol.outline.color );
+
+        if ( this.state.type !== 'line' ) {
+          this.style.symbol.outline.color = this._dojoColorToRgba( this.style.symbol.outline.color );
+        }
 
       } else {
         //TODO 
@@ -93,9 +97,12 @@
     var tabRegion = document.createElement( 'div' );
     el.appendChild( tabRegion ).id = 'malette-tab-region';
 
+    var disabled = ( this.state.type === 'point' ) ? '' : 'disabled';
+    var stroke = ( this.state.type !== 'line' ) ? 'stroke' : 'line';
+
     this._createElement('div', tabRegion, 'malette-color-tab', 'color', 'malette-tab malette-tab-selected');
-    this._createElement('div', tabRegion, 'malette-size-tab', 'size', 'malette-tab');
-    this._createElement('div', tabRegion, 'malette-stroke-tab', 'stroke', 'malette-tab');
+    this._createElement('div', tabRegion, 'malette-size-tab', 'size', 'malette-tab '+disabled);
+    this._createElement('div', tabRegion, 'malette-stroke-tab', stroke, 'malette-tab');
     this._createElement('div', tabRegion, 'malette-opacity-tab', 'opacity', 'malette-tab');
 
     //toggle the tabs!! 
@@ -369,11 +376,9 @@
   */
   Malette.prototype._constructStrokePalette = function(el) {
     var self = this;
-
     el.innerHTML = '';
-
-    var width = this.style.symbol.outline.width || 0.5; 
-
+    var width = ( this.state.type !== 'line' ) ? this.style.symbol.outline.width : this.style.symbol.width; 
+    
     var slider = document.createElement( 'input' );
     slider.type = 'range';
     slider.min = 0.5;
@@ -385,7 +390,9 @@
     var sizeNumber = this._createElement('div', el, 'malette-stroke-width', width+'px', '');
     el.appendChild( sizeNumber );
 
-    this._addColors( el, this.style.symbol.outline.color );
+    if ( this.state.type !== 'line' ) {
+      this._addColors( el, this.style.symbol.outline.color );
+    }
 
     //stroke width change event
     this._idEventBuilder('input', 'malette-stroke-slider', '_onStrokeWidthChanged' );
@@ -554,6 +561,9 @@
         this._constructSizePalette(el);
         break;
       case 'stroke': 
+        this._constructStrokePalette(el);
+        break;
+      case 'line': 
         this._constructStrokePalette(el);
         break;
       case 'opacity': 
@@ -919,7 +929,12 @@
 
 
   Malette.prototype.setStrokeWidth = function(width) {
-    this.style.symbol.outline.width = parseFloat(width);
+    if ( this.state.type !== 'line' ) {
+      this.style.symbol.outline.width = parseFloat(width);
+    } else {
+      this.style.symbol.width = parseFloat(width);
+    }
+    
     var el = document.getElementById( 'malette-stroke-width' );
     el.innerHTML = width + 'px';
     
@@ -988,9 +1003,13 @@
       };
       this.style.symbol.color = (this.options.style.fillColor) ? this.options.style.fillColor : 'rgba(202,58,45,130)';
       this.style.symbol.size = ( this.options.style.radius ) ? this.options.style.radius : 8;
-      this.style.symbol.outline = {};
-      this.style.symbol.outline.width = this.options.style.weight || 1; 
-      this.style.symbol.outline.color = [ this.options.style.color ] || 'rgba(255,255,255,255';
+
+      if ( this.state.type !== 'line' ) {
+        this.style.symbol.outline = {};
+        this.style.symbol.outline.width = this.options.style.weight || 1; 
+        this.style.symbol.outline.color = [ this.options.style.color ] || 'rgba(255,255,255,255';
+      }
+
       this.state.fillOpacity = ( this.options.style.fillOpacity ) ? (this.options.style.fillOpacity * 255) : 255;
     }
 
@@ -1006,9 +1025,13 @@
 
     var css = {};
     css.fillColor = this.style.symbol.color;
-    css.weight = this.style.symbol.outline.width;
-    css.color = this.style.symbol.outline.color;
-    css.radius = this.style.symbol.size;
+
+    if ( this.state.type !== 'line' ) {
+      css.weight = this.style.symbol.outline.width;
+      css.color = this.style.symbol.outline.color;
+      css.radius = this.style.symbol.size;
+    }
+
     css.fillOpacity = this.state.fillOpacity / 255;
 
     callback(css);
@@ -1029,7 +1052,9 @@
 
       if ( this.style.symbol ) {
         this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.state.fillOpacity ); //change colors BACK to dojo :(
-        this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+        if ( this.state.type !== 'line' ) {
+          this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+        }
       }
 
       console.log('emit --->>>', this.style);
@@ -1061,7 +1086,10 @@
       //console.log('fillOpacity', this.state.fillOpacity);
 
       this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.state.fillOpacity ); //change colors BACK to dojo :(
-      this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+
+      if ( this.state.type !== 'line' ) {
+        this.style.symbol.outline.color = this._rgbaToDojoColor( this.style.symbol.outline.color );
+      }
 
       document.getElementById('export-code-block').innerHTML = JSON.stringify(this.style, null, 2);
     } else {
@@ -1171,6 +1199,11 @@
 
 
   Malette.prototype._onTabClick = function(e) {
+    
+    if ( e.target.classList.contains('disabled') ) {
+      return;
+    }
+
     if( e.which === 1 && !(e.metaKey || e.ctrlKey)){
       e.preventDefault();
 
@@ -1182,6 +1215,7 @@
 
       this.changeTab(e.target.innerHTML);
     }
+
   };
 
 

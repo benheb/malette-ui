@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Malette.js | Export</title>
+    <title>Malette.js | Graduated symbols</title>
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <!-- Place favicon.ico in the root directory -->
@@ -28,6 +28,8 @@
     <!-- build:js scripts/vendor/modernizr.js -->
     <script src="/bower_components/modernizr/modernizr.js"></script>
     <!-- endbuild -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
 
   </head>
   <body>
@@ -65,90 +67,76 @@
             <li><a href="index.html"> Esri Simple Renderer</a></li>
             <li><a href="esri-leaflet.html">Esri Leaflet</a></li>
             <hr />
-            <li><i class="active-example glyphicon glyphicon-menu-right"></i>  <a href="examples/export.html">Exporting Styles</a></li>
+            <li><a href="export.html">Exporting Styles</a></li>
             <hr />
             <li><a href="graduated.html">Graduated Symbols</a></li>
             <li><a href="thematic.html">Thematic Maps</a></li>
-            <li><a href="lines.html">Styling Lines</a></li>
+            <li><i class="active-example glyphicon glyphicon-menu-right"></i> <a href="examples/lines.html">Styling Lines</a></li>
           </ul>
         </div>
       </div>
       <div class="line">
-        <h3>Export styles in any format</h5>
+        <h3>Graduated Symbols</h5>
       </div>
       <div class="row row-break col-md-12"></div>
       <div class="row">
         <div class="example-code-block col-md-12 col-sm-12">
           <code>
             <pre>
-  require([
-    "esri/map", 
-    "esri/layers/FeatureLayer", 
-    "esri/renderers/SimpleRenderer", 
-    "dojo/domReady!"
-  ], 
-  var map = new Map("esri-map", {
-    center: [-60, 38.5],
-    zoom: 3,
-    basemap: "dark-gray",
-    smartNavigation: false
-  });
-
-  map.on('load', function() {
-    map.disableScrollWheelZoom();
-  });
-
-  var layer = new FeatureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/0', {
-    mode: FeatureLayer.MODE_ONDEMAND,
-    outFields: ['*']
-  });
-
-  map.addLayer(layer);
-
-  layer.on('load', function() {
-    console.log('layer', layer.renderer);
-    var simpleJson = {
-      "type": "simple",
-      "label": "",
-      "description": "",
-      "symbol": {
-        "color": [221,52,152,191],
-        "size": 3,
-        "angle": 0,
-        "xoffset": 0,
-        "yoffset": 0,
-        "type": "esriSMS",
-        "style": "esriSMSCircle",
-        "outline": {
-          "color": [255,255,255,255],
-          "width": 0.2,
-          "type": "esriSLS",
-          "style": "esriSLSSolid"
-        }
-      }
-    }
-    var rend = new SimpleRenderer(simpleJson);
-    layer.setRenderer(rend);
-    
-    var malette = new Malette('esri-map', {
-      style: simpleJson,
-      formatIn: 'esri-json',
-      formatOut: 'esri-json',
-      exportStyle: true
+require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
+    var map = new Map("esri-map", {
+      center: [-118, 34.5],
+      zoom: 7,
+      basemap: "gray",
+      smartNavigation: false
     });
 
-    malette.on('style-change', function( style ){
-      console.log('exported style', style);
+    map.on('load', function() {
+      map.disableScrollWheelZoom();
+    });
 
-      var rend = new SimpleRenderer(style);
+    var layer = new FeatureLayer('http://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/2012_CA_NHTSA/FeatureServer/0', {
+      mode: FeatureLayer.MODE_ONDEMAND,
+      outFields: ['*']
+    });
+
+    map.addLayer(layer);
+
+    layer.on('load', function() {
+      //console.log('layer', layer);
+      var json = {
+        type: 'simple',
+        symbol: layer.renderer.toJson().defaultSymbol
+      }
+      
+      var rend = new SimpleRenderer(json);
       layer.setRenderer(rend);
       layer.redraw();
 
+      $.getJSON('http://opendataqa.arcgis.com/datasets/059972b3752b490c97d20c1b99c88702_0.json', function(res) {
+        
+        var fields = res.data.fields;
+        malette = new Malette('esri-map', {
+          style: json,
+          formatIn: 'esri-json',
+          formatOut: 'esri-json',
+          fields: fields,
+          type: 'point'
+        });
+
+        malette.on('style-change', function( style ){
+          
+          var rend = jsonUtils.fromJson(style);
+          layer.setRenderer(rend);
+          layer.redraw();
+
+        });
+
+      });
+
     });
 
   });
-
-});
             </pre>
           </code>
         </div>
@@ -201,11 +189,11 @@
     <!-- endbuild -->
 
     <script>
-      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer) { 
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/ClassBreaksRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, ClassBreaksRenderer, jsonUtils) { 
         var map = new Map("esri-map", {
-          center: [-60, 38.5],
-          zoom: 3,
-          basemap: "dark-gray",
+          center: [-122, 47.3],
+          zoom: 8,
+          basemap: "gray",
           smartNavigation: false
         });
 
@@ -213,7 +201,7 @@
           map.disableScrollWheelZoom();
         });
 
-        var layer = new FeatureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/0', {
+        var layer = new FeatureLayer('https://services2.arcgis.com/1UvBaQ5y1ubjUPmd/arcgis/rest/services/River_Routes/FeatureServer/0', {
           mode: FeatureLayer.MODE_ONDEMAND,
           outFields: ['*']
         });
@@ -221,47 +209,27 @@
         map.addLayer(layer);
 
         layer.on('load', function() {
-          console.log('layer', layer.renderer);
-          var simpleJson = {
-            "type": "simple",
-            "label": "",
-            "description": "",
-            "symbol": {
-              "color": [158,188,218,191],
-              "size": 3,
-              "angle": 0,
-              "xoffset": 0,
-              "yoffset": 0,
-              "type": "esriSMS",
-              "style": "esriSMSCircle",
-              "outline": {
-                "color": [255,255,255,255],
-                "width": 0.2,
-                "type": "esriSLS",
-                "style": "esriSLSSolid"
-              }
-            }
-          }
-          var rend = new SimpleRenderer(simpleJson);
-          layer.setRenderer(rend);
+          console.log('layer', layer.renderer.toJson());
           
-          var malette = new Malette('esri-map', {
-            style: simpleJson,
+          var json = {
+            type: 'simple',
+            symbol: layer.renderer.toJson().symbol
+          }
+
+          malette = new Malette('esri-map', {
+            style: json,
             formatIn: 'esri-json',
             formatOut: 'esri-json',
-            exportStyle: true
+            type: 'line'
           });
 
           malette.on('style-change', function( style ){
-            console.log('exported style', style);
-
-            var rend = new SimpleRenderer(style);
+            
+            var rend = jsonUtils.fromJson(style);
             layer.setRenderer(rend);
             layer.redraw();
 
           });
-
-          $('#malette-export-toggle').trigger('click');
 
         });
 

@@ -11,7 +11,11 @@ const reload = browserSync.reload;
 
 gulp.task('deploy', function() {
   return gulp.src('./dist/**/*')
-    .pipe(ghPages());
+    .pipe(ghPages({
+        remoteUrl: "git@github.com:benheb/benheb.github.io.git",
+        branch: 'master'
+      }
+    ));
 });
 
 gulp.task('styles', () => {
