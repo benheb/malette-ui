@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Malette.js | Esri Leaflet example</title>
+    <title>Malette.js | Search data and style it</title>
 
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <!-- Place favicon.ico in the root directory -->
@@ -14,8 +14,9 @@
     <!-- endbower -->
     <!-- endbuild -->
 
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css">
     <link rel="stylesheet" type="text/css" href="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css">
+    <link rel="stylesheet" type="text/css" href="https://rawgit.com/benheb/open-search/master/open-search.css">
     <link rel="stylesheet" href="../malette/malette.css" />
 
     <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
@@ -55,71 +56,13 @@
 
     <div class="container" id="examples">
       <div class="row">
-        <div class="col-md-10 col-sm-10">
+        <div class="col-md-12 col-sm-12">
           <div id="examples-content">
-            <div id="esri-leaflet-map">
+            <div id="search-container"></div>
+            <div id="esri-map" class="search-map">
             </div>
           </div>
         </div>
-        <div id="examples-list" class="col-md-2 col-sm-2">
-          <h4>Examples</h4>
-          <ul>
-            <li><a href="index.html"> Esri Simple Renderer</a></li>
-            <li><i class="active-example glyphicon glyphicon-menu-right"></i>  <a href="examples/esri-leaflet.html">Esri Leaflet</a></li>
-            <hr />
-            <li><a href="export.html">Exporting Styles</a></li>
-            <hr />
-            <li><a href="graduated.html">Graduated Symbols</a></li>
-            <li><a href="thematic.html">Thematic Maps</a></li>
-            <li><a href="lines.html">Styling Lines</a></li>
-            <hr />
-            <li><a href="search.html">Datasets from ArcGIS Open Data</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="line">
-        <h3>Esri Leaflet style generator</h5>
-      </div>
-      <div class="row row-break col-md-12"></div>
-      <div class="row">
-        <div class="example-code-block col-md-12 col-sm-12">
-          <code>
-            <pre>
-  var map = L.map('esri-leaflet-map').setView([32.891, -20], 3);
-  L.esri.basemapLayer("Gray").addTo(map);
-
-  map.scrollWheelZoom.disable();
-  map.dragging.disable();
-
-  var style = {
-      radius: 4,
-      fillColor: "#999",
-      color: "#FFF",
-      weight: 0.5,
-      opacity: 1,
-      fillOpacity: 0.7
-  };
-
-  var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/1', {
-      pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, style);
-      }
-    }).addTo(map);
-
-  var malette = new Malette('esri-leaflet-map', {
-    style: style,
-    formatIn: 'css',
-    formatOut: 'css'
-  });
-
-
-  malette.on('style-change', function( style ){
-    layer.setStyle(style);
-  });
-            </pre>
-          </code>
-        </div>
-      </div>
     </div>
 
     <div class="footer">
@@ -159,9 +102,8 @@
     <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
     <!-- endbuild -->
 
-    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-    <script src="http://cdn-geoweb.s3.amazonaws.com/esri-leaflet/1.0.0-rc.6/esri-leaflet.js"></script>
-
+    <script src="http://js.arcgis.com/3.13/"></script>
+    <script src="https://rawgit.com/benheb/open-search/master/open-search.js"></script>
     <script src="../malette/malette.js"></script>
 
     <!-- build:js scripts/main.js -->
@@ -169,38 +111,121 @@
     <!-- endbuild -->
 
     <script>
-      $( document ).ready(function() {
-        var map = L.map('esri-leaflet-map').setView([32.891, -20], 3);
-        L.esri.basemapLayer("Gray").addTo(map);
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer) { 
+        var map = new Map("esri-map", {
+          center: [-97, 36.5],
+          zoom: 4,
+          basemap: "gray",
+          smartNavigation: false
+        });
 
-        map.scrollWheelZoom.disable();
-        map.dragging.disable();
+        map.on('load', function() {
+          map.disableScrollWheelZoom();
+        });
 
-        var style = {
-            radius: 4,
-            fillColor: "#999",
-            color: "#FFF",
-            weight: 0.5,
-            opacity: 1,
-            fillOpacity: 0.7
-        };
+        var search = new OpenSearch('search-container', {});
 
-        var layer = L.esri.featureLayer('http://tmservices1.esri.com/arcgis/rest/services/LiveFeeds/NOAA_METAR_current_wind_speed_direction/MapServer/1', {
-            pointToLayer: function (feature, latlng) {
-              return L.circleMarker(latlng, style);
+        var layer = null, malette, type;
+        search.on('search-result-selected', function(url) {
+          
+          var renderers = {
+            'point' : {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": [43,140,190,200],
+                "size": 6,
+                "angle": 0,
+                "xoffset": 0,
+                "yoffset": 0,
+                "type": "esriSMS",
+                "style": "esriSMSCircle",
+                "outline": {
+                  "color": [255,255,255,255],
+                  "width": 1.5,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                }
+              }
+            },
+            'polygon': {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": [43,140,190,200],
+                "size": 6,
+                "angle": 0,
+                "xoffset": 0,
+                "yoffset": 0,
+                'style': "esriSFSSolid",
+                'type': "esriSFS",
+                "outline": {
+                  "color": [255,255,255,255],
+                  "width": 1.5,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                }
+              }
             }
-          }).addTo(map);
+          };
+          
+          if ( layer ) {map.removeLayer(layer);}
+          if ( malette ) { 
+            malette.destroy(); 
+          }
 
-        var malette = new Malette('esri-leaflet-map', {
-          style: style,
-          formatIn: 'css',
-          formatOut: 'css'
+          layer = new FeatureLayer(url, {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            outFields: ['*']
+          });
+
+          window.map = map;
+          map.addLayer(layer);
+
+          layer.on('load', function() {
+            
+            switch(layer.geometryType) {
+              case 'esriGeometryPoint': 
+                type = 'point';
+                break;
+              case 'esriGeometryPolygon': 
+                type = 'polygon';
+                break;
+              default: 
+                type = 'point';
+            }
+            console.log('type', type);
+
+            map.setExtent(layer.fullExtent);
+
+            var json = renderers[type];
+            console.log('json', json);
+            var rend = new SimpleRenderer(json);
+            layer.setRenderer(rend);
+            layer.redraw();
+
+            malette = new Malette('esri-map', {
+              style: json,
+              formatIn: 'esri-json',
+              formatOut: 'esri-json'
+            });
+
+            //window.malette = malette; 
+
+            malette.on('style-change', function( style ){
+              console.log('exported style', style);
+
+              var rend = new SimpleRenderer(style);
+              layer.setRenderer(rend);
+              layer.redraw();
+
+            });
+
+          });
         });
 
-
-        malette.on('style-change', function( style ){
-          layer.setStyle(style);
-        });
       });
     </script>
   </body>

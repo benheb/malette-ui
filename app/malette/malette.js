@@ -60,6 +60,14 @@
   };
 
 
+
+  Malette.prototype.destroy = function() {
+    var parent = document.getElementById( this.container ); 
+    parent.removeChild( document.getElementById('malette') );
+  }
+
+
+
   /************* UI **************/
 
   /*
