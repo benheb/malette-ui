@@ -1,0 +1,129 @@
+<!doctype html> <html class=no-js> <head> <meta charset=utf-8> <meta name=description> <meta name=viewport content="width=device-width, initial-scale=1"> <title>Malette.js | Search data and style it</title> <link rel=apple-touch-icon href=apple-touch-icon.png>  <link rel=stylesheet href=http://js.arcgis.com/3.13/esri/css/esri.css> <link rel=stylesheet type=text/css href=http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css> <link rel=stylesheet type=text/css href=https://rawgit.com/benheb/open-search/master/open-search.css> <link rel=stylesheet href=../malette/malette.css> <link href="http://fonts.googleapis.com/css?family=Lato" rel=stylesheet type=text/css> <link href="http://fonts.googleapis.com/css?family=Varela" rel=stylesheet type=text/css> <link rel=stylesheet href=../styles/main.css> <script src=scripts/vendor/modernizr.js></script> <script src=https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js></script> </head> <body> <!--[if lt IE 10]>
+ <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+ <![endif]--> <nav class="navbar navbar-default"> <div> <div class=navbar-header> <a href="../" class=navbar-brand>Malette</a> </div> <span class=pull-right> <ul class="nav navbar-nav"> <li><a href=../#getting-started>Getting Started</a></li> <li><a href=../examples>Examples</a></li> <li><a href=../docs.html>docs</a></li> <li><a href=https://github.com/benheb/malette>Github</a></li> </ul></span></div> </nav> <div class=container id=examples> <div class=row> <div class="col-md-12 col-sm-12"> <div id=examples-content> <div id=search-container></div> <div id=esri-map class=search-map> </div> </div> </div> </div> <div class=footer> <p>With ♥ from the Esri DC team</p> </div>  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-64996221-1', 'auto');
+      ga('send', 'pageview');
+
+    </script> <script src=scripts/vendor.js></script> <script src=scripts/plugins.js></script> <script src="http://js.arcgis.com/3.13/"></script> <script src=https://rawgit.com/benheb/open-search/master/open-search.js></script> <script src=../malette/malette.js></script> <script src=scripts/main.js></script> <script>
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer) { 
+        var map = new Map("esri-map", {
+          center: [-97, 36.5],
+          zoom: 4,
+          basemap: "gray",
+          smartNavigation: false
+        });
+
+        map.on('load', function() {
+          map.disableScrollWheelZoom();
+        });
+
+        var search = new OpenSearch('search-container', {});
+
+        var layer = null, malette, type;
+        search.on('search-result-selected', function(url) {
+          
+          var renderers = {
+            'point' : {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": [43,140,190,200],
+                "size": 6,
+                "angle": 0,
+                "xoffset": 0,
+                "yoffset": 0,
+                "type": "esriSMS",
+                "style": "esriSMSCircle",
+                "outline": {
+                  "color": [255,255,255,255],
+                  "width": 1.5,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                }
+              }
+            },
+            'polygon': {
+              "type": "simple",
+              "label": "",
+              "description": "",
+              "symbol": {
+                "color": [43,140,190,200],
+                "size": 6,
+                "angle": 0,
+                "xoffset": 0,
+                "yoffset": 0,
+                'style': "esriSFSSolid",
+                'type': "esriSFS",
+                "outline": {
+                  "color": [255,255,255,255],
+                  "width": 1.5,
+                  "type": "esriSLS",
+                  "style": "esriSLSSolid"
+                }
+              }
+            }
+          };
+          
+          if ( layer ) {map.removeLayer(layer);}
+          if ( malette ) { 
+            malette.destroy(); 
+          }
+
+          layer = new FeatureLayer(url, {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            outFields: ['*']
+          });
+
+          window.map = map;
+          map.addLayer(layer);
+
+          layer.on('load', function() {
+            
+            switch(layer.geometryType) {
+              case 'esriGeometryPoint': 
+                type = 'point';
+                break;
+              case 'esriGeometryPolygon': 
+                type = 'polygon';
+                break;
+              default: 
+                type = 'point';
+            }
+            console.log('type', type);
+
+            map.setExtent(layer.fullExtent);
+
+            var json = renderers[type];
+            console.log('json', json);
+            var rend = new SimpleRenderer(json);
+            layer.setRenderer(rend);
+            layer.redraw();
+
+            malette = new Malette('esri-map', {
+              style: json,
+              formatIn: 'esri-json',
+              formatOut: 'esri-json'
+            });
+
+            //window.malette = malette; 
+
+            malette.on('style-change', function( style ){
+              console.log('exported style', style);
+
+              var rend = new SimpleRenderer(style);
+              layer.setRenderer(rend);
+              layer.redraw();
+
+            });
+
+          });
+        });
+
+      });
+    </script> </div></body> </html> 
