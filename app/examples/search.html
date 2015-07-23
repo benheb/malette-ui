@@ -111,7 +111,9 @@
     <!-- endbuild -->
 
     <script>
-      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer) { 
+      var search; 
+
+      require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, jsonUtils) { 
         var map = new Map("esri-map", {
           center: [-97, 36.5],
           zoom: 4,
@@ -123,10 +125,23 @@
           map.disableScrollWheelZoom();
         });
 
-        var search = new OpenSearch('search-container', {});
+        search = new OpenSearch('search-container', {});
+
+        $('#esri-map').on('dragover', function(e) {
+          e.preventDefault();
+        });
+
+        $('#esri-map').on('drop', function(e) {
+          var data = e.originalEvent.dataTransfer.getData("text");
+          var urls = data.split(',');
+          var service = urls[0];
+          var id = urls[1];
+          addToMap(service, id);
+        });
 
         var layer = null, malette, type;
-        search.on('search-result-selected', function(url) {
+        //search.on('search-result-selected', function(url) {
+        function addToMap(service, id) {
           
           var renderers = {
             'point' : {
@@ -170,13 +185,13 @@
               }
             }
           };
-          
+
           if ( layer ) {map.removeLayer(layer);}
           if ( malette ) { 
             malette.destroy(); 
           }
 
-          layer = new FeatureLayer(url, {
+          layer = new FeatureLayer(service, {
             mode: FeatureLayer.MODE_ONDEMAND,
             outFields: ['*']
           });
@@ -196,36 +211,51 @@
               default: 
                 type = 'point';
             }
-            console.log('type', type);
-
-            map.setExtent(layer.fullExtent);
+            
+            map.setExtent(layer.fullExtent, false);
 
             var json = renderers[type];
-            console.log('json', json);
             var rend = new SimpleRenderer(json);
             layer.setRenderer(rend);
             layer.redraw();
 
-            malette = new Malette('esri-map', {
-              style: json,
-              formatIn: 'esri-json',
-              formatOut: 'esri-json'
-            });
+            console.log('openJson', id);
+            $.getJSON('http://opendata.arcgis.com/datasets/' + id + '.json', function(res) {
+              
+              var fields = res.data.fields;
+              malette = new Malette('esri-map', {
+                style: json,
+                formatIn: 'esri-json',
+                formatOut: 'esri-json',
+                fields: fields,
+                type: type
+              });
 
-            //window.malette = malette; 
+              window.malette = malette; 
 
-            malette.on('style-change', function( style ){
-              console.log('exported style', style);
+              if ( type === "polygon" ) {
+                setTimeout(function() {
+                  $('#malette-theme-color-option').trigger('click');  
+                },100);
+              } else if ( type === 'point' ) {
+                setTimeout(function() {
+                  $('#malette-size-tab').trigger('click');
+                  $('#malette-graduated-size-option').trigger('click');
+                },100);
+              }
 
-              var rend = new SimpleRenderer(style);
-              layer.setRenderer(rend);
-              layer.redraw();
+              malette.on('style-change', function( style ){
+                console.log('exported style', style);
 
+                var rend = jsonUtils.fromJson(style);
+                layer.setRenderer(rend);
+                layer.redraw();
+
+              });
             });
 
           });
-        });
-
+        };
       });
     </script>
   </body>
