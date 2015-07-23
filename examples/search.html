@@ -111,7 +111,7 @@
                 type = 'point';
             }
             
-            map.setExtent(layer.fullExtent, false);
+            map.setExtent(layer.fullExtent.expand(2), false);
 
             var json = renderers[type];
             var rend = new SimpleRenderer(json);
