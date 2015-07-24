@@ -248,15 +248,33 @@ pre {
 }
 
 #search-container {
-  width: 300px;
+  width: 320px;
   height: 500px;
   position: absolute;
   top:3px;
 }
 
+#esri-search-map #malette-header {
+  padding: 5px;
+  background: #676c7f;
+  text-transform: uppercase;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1em;
+  pointer-events:auto;
+  color: #FFF;
+  text-shadow: none;
+}
+
+#esri-search-map #malette {
+  right: 5px;
+  top: 5px;
+}
+
 .search-map .esriSimpleSliderTL {
   top: 6px !important;
-  left: 305px !important;
+  left: 325px !important;
 }
 
 //animations
