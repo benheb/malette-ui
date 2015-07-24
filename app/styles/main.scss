@@ -207,6 +207,11 @@ pre {
   margin-top:25px;
 }
 
+#search-example {
+  height:100%;
+  position: relative;
+}
+
 #examples-content {
   background-color: rgba(219, 218, 214, 0.1);
   padding: 15px;
@@ -237,11 +242,16 @@ pre {
   position: relative;
 }
 
+#esri-search-map {
+  height:100%;
+  width:100%;
+}
+
 #search-container {
   width: 300px;
   height: 500px;
   position: absolute;
-  top:22px;
+  top:3px;
 }
 
 .search-map .esriSimpleSliderTL {

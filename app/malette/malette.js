@@ -473,7 +473,7 @@
     var select = document.createElement('select');
     for (var i = 0; i < this.options.fields.length; i++) { 
       if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' 
-        || this.options.fields[i].type === 'esriFieldTypeSingle' ) {
+        || this.options.fields[i].type === 'esriFieldTypeSingle' || this.options.fields[i].type === 'esriFieldTypeSmallInteger' ) {
         if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
           var option = document.createElement('option');
           option.setAttribute('value', this.options.fields[i].type);
