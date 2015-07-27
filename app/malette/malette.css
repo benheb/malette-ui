@@ -26,6 +26,18 @@
   text-shadow: 1px 1px 1px #EEE, 0 0 0 #EEE, 1px 2px 4px #EEE;
 }
 
+#malette-title {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding-left: 4px;
+  padding-right: 10px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Don't show shadows when selecting text */
 ::-moz-selection { background: #5af; color: #fff; text-shadow: none; }
 ::selection { background: #5af; color: #fff; text-shadow: none; }

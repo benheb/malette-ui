@@ -53,6 +53,22 @@ body,html {
   }
 }
 
+#nprogress .bar {
+  //background: #fa9581;
+  background: #fff;
+}
+
+#nprogress .spinner-icon {
+  //border-top-color: #fa9581;
+  //border-left-color: #fa9581;
+  border-top-color: #fff;
+  border-left-color: #fff;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #FFF, 0 0 5px #FFF;
+}
+
 /* Custom page footer */
 .footer {
   margin-top:70px;

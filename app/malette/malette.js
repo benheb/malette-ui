@@ -26,6 +26,9 @@
     this.format = options.formatIn || 'esri-json';
     this.exportFormat = options.formatOut || 'esri-json';
 
+    //can choropleth || graduate 
+    this._hasApplicableFields = this._getApplicableFields();
+
     if ( this.format === 'esri-json' ) {
       if ( options.style ) {
         
@@ -86,6 +89,13 @@
     var header = document.createElement( 'div' );
     innerContainer.appendChild( header ).id = 'malette-header';
     header.innerHTML = 'Malette';
+
+    if ( this.options.title ) {
+      var header = document.createElement( 'div' );
+      innerContainer.appendChild( header ).id = 'malette-title';
+      header.innerHTML = this.options.title;
+      document.getElementById('malette-content').style['margin-top'] = '40px';
+    }
 
     this._addTabs(innerContainer);
     this._constructColorRegion(content);
@@ -258,7 +268,7 @@
     
     this._createElement('div', el, 'malette-single-color-option', 'Single', 'malette-option-toggle malette-option-toggle-selected');
 
-    if ( this.options.fields ) {
+    if ( this._hasApplicableFields === true ) {
       this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle');
     } else {
       this._createElement('div', el, 'malette-theme-color-option', 'Theme', 'malette-option-toggle disabled');
@@ -274,7 +284,7 @@
     //show single colors event 
     this._idEventBuilder('click', 'malette-single-color-option', 'showSingleColorUI' );
 
-    if ( this.options.fields ) {
+    if ( this._hasApplicableFields === true ) {
       this._addThemes(colorContainer);
 
       //show ui theme event 
@@ -327,7 +337,7 @@
     el.innerHTML = '';
 
     this._createElement('div', el, 'malette-single-size-option', 'Single', 'malette-option-toggle malette-option-toggle-selected');
-    if ( this.options.fields ) {
+    if ( this._hasApplicableFields === true ) {
       this._createElement('div', el, 'malette-graduated-size-option', 'Graduated', 'malette-option-toggle');
     } else {
       this._createElement('div', el, 'malette-graduated-size-option', 'Graduated', 'malette-option-toggle disabled');
@@ -353,7 +363,7 @@
     //show single size event 
     this._idEventBuilder('click', 'malette-single-size-option', 'showSingleSizeUI' );
 
-    if ( this.options.fields ) {
+    if ( this._hasApplicableFields === true ) {
       this._addGraduated(el);
 
       //change to graduated size event 
@@ -506,6 +516,31 @@
       }
       document.getElementById( id ).getElementsByTagName('option')[index].selected = 'selected';
     }
+  }
+
+
+
+  /*
+  * Checks if we can use any of the fields passed in as options 
+  *
+  *
+  */
+  Malette.prototype._getApplicableFields = function() {
+    var isApplicable = false; 
+
+    if ( this.options.fields ) {
+      for (var i = 0; i < this.options.fields.length; i++) { 
+        if ( this.options.fields[i].type === 'esriFieldTypeDouble' || this.options.fields[i].type === 'esriFieldTypeInteger' 
+          || this.options.fields[i].type === 'esriFieldTypeSingle' || this.options.fields[i].type === 'esriFieldTypeSmallInteger' ) {
+          if ( this.options.fields[i].statistics && this.options.fields[i].statistics.max ) {
+            isApplicable = true; 
+          }
+        }
+      }
+    }
+
+    console.log('IS isApplicable', isApplicable);
+    return isApplicable;
   }
 
 

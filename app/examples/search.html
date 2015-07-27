@@ -11,6 +11,7 @@
 
     <!-- build:css styles/vendor.css -->
     <!-- bower:css -->
+    <link rel="stylesheet" href="/bower_components/nprogress/nprogress.css" />
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -74,6 +75,7 @@
     <!-- build:js scripts/vendor.js -->
     <!-- bower:js -->
     <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/nprogress/nprogress.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
     
@@ -103,6 +105,14 @@
     <script>
       var search; 
 
+      $( document ).ajaxStart(function() {
+        NProgress.start();
+      });
+
+      $( document ).ajaxStop(function() {
+        NProgress.done();
+      });
+
       require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, jsonUtils) { 
         var map = new Map("esri-search-map", {
           center: [-97, 36.5],
@@ -125,12 +135,54 @@
         });
 
         $('#esri-search-map').on('drop', function(e) {
+          NProgress.start();
           var data = e.originalEvent.dataTransfer.getData("text");
           var urls = data.split(',');
           var service = urls[0];
           var id = urls[1];
           addToMap(service, id);
         });
+
+        function isWebMercator(spatialReference){
+          //Esri wkids that are "web mercator"
+          var wkids = [102100,102113,3857];
+          var result = false;
+          wkids.forEach(function(id){
+            if(spatialReference.wkid === id || spatialReference.latestWkid === id){
+              result = true;
+            }
+          });
+          return result;
+        }
+
+
+        function projectGeometries(inSR, outSR, geometryType, geometries){
+          //url
+          var prjUrl = 'http://utilitydev.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/project';
+          //setup the params
+          var gparam = {
+            geometryType: geometryType,
+            geometries: [geometries]
+          };
+          var params = {
+            geometries: JSON.stringify(gparam),
+            transformForward:false,
+            transformation:'',
+            inSR: inSR,
+            outSR: outSR,
+            f:'json' 
+          };
+          //ajax options
+          var options = {
+            url: prjUrl,
+            method:'POST',
+            data: params,
+            dataType:'json'
+          };
+          //console.log('options', options);
+          //return the jquery promise
+          return $.ajax(options);
+        }
 
         var layer = null, malette, type;
         //search.on('search-result-selected', function(url) {
@@ -193,7 +245,10 @@
           map.addLayer(layer);
 
           layer.on('load', function() {
-            
+            layer.minScale = 0; 
+            layer.maxScale = 0;
+
+            console.log('layer', layer);
             switch(layer.geometryType) {
               case 'esriGeometryPoint': 
                 type = 'point';
@@ -205,23 +260,39 @@
                 type = 'point';
             }
             
-            map.setExtent(layer.fullExtent.expand(2), false);
+            var merc = isWebMercator(layer.spatialReference);
+            if ( merc ) {
+              map.setExtent(layer.fullExtent.expand(2), false);
+            } else {
+              console.log('layer.fullExtent.spatialReference.wkdid', layer.fullExtent.spatialReference.wkid);
+              projectGeometries(layer.fullExtent.spatialReference.wkid, 102100, 'esriGeometryEnvelope', layer.fullExtent )
+                .done(function(data){
+                  //console.log('data', data);
+                  var prjExtJson = data.geometries[0];
+                  prjExtJson.spatialReference = {wkid: 102100};
+                  var prjExt = new esri.geometry.Extent(prjExtJson);
+                  map.setExtent(prjExt.expand(2), false);
+                })
+            }
 
             var json = renderers[type];
             var rend = new SimpleRenderer(json);
             layer.setRenderer(rend);
             layer.redraw();
 
-            console.log('openJson', id);
+            NProgress.done();
+
             $.getJSON('http://opendata.arcgis.com/datasets/' + id + '.json', function(res) {
-              
               var fields = res.data.fields;
+              var name = res.data.name;
               malette = new Malette('esri-search-map', {
+                title: name,
                 style: json,
                 formatIn: 'esri-json',
                 formatOut: 'esri-json',
                 fields: fields,
-                type: type
+                type: type,
+                exportStyle: true
               });
 
               window.malette = malette; 
