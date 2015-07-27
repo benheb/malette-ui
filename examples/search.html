@@ -1,4 +1,4 @@
-<!doctype html> <html class=no-js> <head> <meta charset=utf-8> <meta name=description> <meta name=viewport content="width=device-width, initial-scale=1"> <title>Malette.js | Search data and style it</title> <link rel=apple-touch-icon href=apple-touch-icon.png>  <link rel=stylesheet href=http://js.arcgis.com/3.13/esri/css/esri.css> <link rel=stylesheet type=text/css href=http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css> <link rel=stylesheet type=text/css href=https://rawgit.com/benheb/open-search/master/open-search.css> <link rel=stylesheet href=../malette/malette.css> <link href="http://fonts.googleapis.com/css?family=Lato" rel=stylesheet type=text/css> <link href="http://fonts.googleapis.com/css?family=Varela" rel=stylesheet type=text/css> <link rel=stylesheet href=../styles/main.css> <script src=scripts/vendor/modernizr.js></script> <script src=https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js></script> </head> <body> <!--[if lt IE 10]>
+<!doctype html> <html class=no-js> <head> <meta charset=utf-8> <meta name=description> <meta name=viewport content="width=device-width, initial-scale=1"> <title>Malette.js | Search data and style it</title> <link rel=apple-touch-icon href=apple-touch-icon.png>  <link rel=stylesheet href=styles/vendor.css> <link rel=stylesheet href=http://js.arcgis.com/3.13/esri/css/esri.css> <link rel=stylesheet type=text/css href=http://cdn-geoweb.s3.amazonaws.com/esri-leaflet-geocoder/1.0.0-rc.4/esri-leaflet-geocoder.css> <link rel=stylesheet type=text/css href=https://rawgit.com/benheb/open-search/master/open-search.css> <link rel=stylesheet href=../malette/malette.css> <link href="http://fonts.googleapis.com/css?family=Lato" rel=stylesheet type=text/css> <link href="http://fonts.googleapis.com/css?family=Varela" rel=stylesheet type=text/css> <link rel=stylesheet href=../styles/main.css> <script src=scripts/vendor/modernizr.js></script> <script src=https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js></script> </head> <body> <!--[if lt IE 10]>
  <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
  <![endif]--> <nav class="navbar navbar-default"> <div> <div class=navbar-header> <a href="../" class=navbar-brand>Malette</a> </div> <span class=pull-right> <ul class="nav navbar-nav"> <li><a href=../#getting-started>Getting Started</a></li> <li><a href=../examples>Examples</a></li> <li><a href=../docs.html>docs</a></li> <li><a href=https://github.com/benheb/malette>Github</a></li> </ul></span></div> </nav> <div id=search-example> <div id=search-container></div> <div id=esri-search-map class=search-map></div> </div>  <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -11,6 +11,14 @@
 
     </script> <script src=scripts/vendor.js></script> <script src=scripts/plugins.js></script> <script src="http://js.arcgis.com/3.13/"></script> <script src=https://rawgit.com/benheb/open-search/master/open-search.js></script> <script src=../malette/malette.js></script> <script src=scripts/main.js></script> <script>
       var search; 
+
+      $( document ).ajaxStart(function() {
+        NProgress.start();
+      });
+
+      $( document ).ajaxStop(function() {
+        NProgress.done();
+      });
 
       require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer", "esri/renderers/jsonUtils", "dojo/domReady!"], function(Map, FeatureLayer, SimpleRenderer, jsonUtils) { 
         var map = new Map("esri-search-map", {
@@ -34,12 +42,54 @@
         });
 
         $('#esri-search-map').on('drop', function(e) {
+          NProgress.start();
           var data = e.originalEvent.dataTransfer.getData("text");
           var urls = data.split(',');
           var service = urls[0];
           var id = urls[1];
           addToMap(service, id);
         });
+
+        function isWebMercator(spatialReference){
+          //Esri wkids that are "web mercator"
+          var wkids = [102100,102113,3857];
+          var result = false;
+          wkids.forEach(function(id){
+            if(spatialReference.wkid === id || spatialReference.latestWkid === id){
+              result = true;
+            }
+          });
+          return result;
+        }
+
+
+        function projectGeometries(inSR, outSR, geometryType, geometries){
+          //url
+          var prjUrl = 'http://utilitydev.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/project';
+          //setup the params
+          var gparam = {
+            geometryType: geometryType,
+            geometries: [geometries]
+          };
+          var params = {
+            geometries: JSON.stringify(gparam),
+            transformForward:false,
+            transformation:'',
+            inSR: inSR,
+            outSR: outSR,
+            f:'json' 
+          };
+          //ajax options
+          var options = {
+            url: prjUrl,
+            method:'POST',
+            data: params,
+            dataType:'json'
+          };
+          //console.log('options', options);
+          //return the jquery promise
+          return $.ajax(options);
+        }
 
         var layer = null, malette, type;
         //search.on('search-result-selected', function(url) {
@@ -102,7 +152,10 @@
           map.addLayer(layer);
 
           layer.on('load', function() {
-            
+            layer.minScale = 0; 
+            layer.maxScale = 0;
+
+            console.log('layer', layer);
             switch(layer.geometryType) {
               case 'esriGeometryPoint': 
                 type = 'point';
@@ -114,18 +167,33 @@
                 type = 'point';
             }
             
-            map.setExtent(layer.fullExtent.expand(2), false);
+            var merc = isWebMercator(layer.spatialReference);
+            if ( merc ) {
+              map.setExtent(layer.fullExtent.expand(2), false);
+            } else {
+              console.log('layer.fullExtent.spatialReference.wkdid', layer.fullExtent.spatialReference.wkid);
+              projectGeometries(layer.fullExtent.spatialReference.wkid, 102100, 'esriGeometryEnvelope', layer.fullExtent )
+                .done(function(data){
+                  //console.log('data', data);
+                  var prjExtJson = data.geometries[0];
+                  prjExtJson.spatialReference = {wkid: 102100};
+                  var prjExt = new esri.geometry.Extent(prjExtJson);
+                  map.setExtent(prjExt.expand(2), false);
+                })
+            }
 
             var json = renderers[type];
             var rend = new SimpleRenderer(json);
             layer.setRenderer(rend);
             layer.redraw();
 
-            console.log('openJson', id);
+            NProgress.done();
+
             $.getJSON('http://opendata.arcgis.com/datasets/' + id + '.json', function(res) {
-              
               var fields = res.data.fields;
+              var name = res.data.name;
               malette = new Malette('esri-search-map', {
+                title: name,
                 style: json,
                 formatIn: 'esri-json',
                 formatOut: 'esri-json',
