@@ -1108,13 +1108,13 @@
         }
       }
 
-      console.log('emit --->>>', this.style);
-      this.emit( 'style-change', this.style, this.layerId );
+      console.log('emit --->>>', this.style, this.state.layerId);
+      this.emit( 'style-change', this.style, this.state.layerId );
     } else {
 
       if ( this.exportFormat === 'css' ) {
         this._toCss(function(css) {
-          self.emit( 'style-change', css, this.layerId );
+          self.emit( 'style-change', css, self.state.layerId );
         });
       }
 
