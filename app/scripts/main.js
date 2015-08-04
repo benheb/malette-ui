@@ -155,10 +155,12 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
           formatOut: 'esri-json',
           fields: fields,
           type: 'point',
-          exportStyle: true
+          exportStyle: true,
+          layerId: '123'
         });
 
         malette.on('style-change', function( style ){
+          console.log('ID!!!', style.layerId);
           var rend = jsonUtils.fromJson(style);
           layer.setRenderer(rend);
           layer.redraw();
