@@ -21,6 +21,7 @@
     this.state._isGraduated = false;
     this.state._isTheme = false;
     this.state.type = (options.type) ? options.type.toLowerCase() : 'point';
+    this.state.layerId = options.layerId || null;
 
     //style params 
     this.format = options.formatIn || 'esri-json';
@@ -1108,12 +1109,12 @@
       }
 
       console.log('emit --->>>', this.style);
-      this.emit( 'style-change', this.style );
+      this.emit( 'style-change', this.style, this.layerId );
     } else {
 
       if ( this.exportFormat === 'css' ) {
         this._toCss(function(css) {
-          self.emit( 'style-change', css );
+          self.emit( 'style-change', css, this.layerId );
         });
       }
 
