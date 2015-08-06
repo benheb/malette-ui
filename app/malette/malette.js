@@ -34,11 +34,11 @@
       if ( options.style ) {
         
         this.style = options.style || {};
-        if ( this.style.symbol && this.style.classBreakInfos ) {
+        if ( !this.style.symbol && this.style.classBreakInfos ) {
           this.style.symbol = this.style.classBreakInfos[0].symbol;
         }
         console.log('MALETTE: this.style.symbol', this.style.symbol);
-        
+
         this.state.fillOpacity = this.style.symbol.color[3];
         this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc\
 
