@@ -34,10 +34,14 @@
       if ( options.style ) {
         
         this.style = options.style || {};
-        if ( !this.style.symbol && this.style.classBreakInfos ) {
-          this.style.symbol = this.style.classBreakInfos[0].symbol;
+        console.log('this.style -----> SHOULD NOW HAVE DEFAULT SYMBOL', this.style);
+        if ( this.style.visualVariables ) {
+          this._setRamp();
         }
-        console.log('MALETTE: this.style.symbol', this.style.symbol);
+        if ( !this.style.symbol && this.style.defaultSymbol ) {
+          this.style.symbol = this.style.defaultSymbol;
+        }
+        console.log('this.style.symbol...???...', this.style.symbol);
 
         this.state.fillOpacity = this.style.symbol.color[3];
         this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc\
@@ -1023,6 +1027,18 @@
 
 
 
+  Malette.prototype._setRamp = function() {
+    if ( !this.selectedRamp ) this.selectedRamp = [];
+    var self = this;
+
+    this.style.visualVariables[0].stops.forEach(function(stop) {
+      var color = stop.color;
+      self.selectedRamp.push(color);
+    });
+  }
+
+
+
   //helpers 
   Malette.prototype._dojoColorToRgba = function(c) {
     var color = 'rgba('+c[0]+','+c[1]+','+c[2]+','+c[3]+')';
@@ -1114,6 +1130,7 @@
       }
 
       this.style.layerId = this.state.layerId;
+      this.style.defaultSymbol = this.style.symbol;
       console.log('emit --->>>', this.style);
       this.emit( 'style-change', this.style);
     } else {
@@ -1121,6 +1138,7 @@
       if ( this.exportFormat === 'css' ) {
         this._toCss(function(css) {
           css.layerId = self.state.layerId;
+          css.defaultSymbol = css.symbol;
           self.emit( 'style-change', css );
         });
       }
