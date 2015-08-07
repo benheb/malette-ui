@@ -87,19 +87,158 @@ require(["esri/map", "esri/layers/FeatureLayer", "esri/renderers/SimpleRenderer"
         map.addLayer(layer);
 
         layer.on('load', function() {
+
+          var json = {
+            "visualVariables": [
+              {
+                "type": "colorInfo",
+                "field": "DRAWSEQ",
+                "stops": [
+                  {
+                    "value": 1,
+                    "color": {
+                      "r": 255,
+                      "g": 255,
+                      "b": 204,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 7.25,
+                    "color": {
+                      "r": 255,
+                      "g": 237,
+                      "b": 160,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 13.5,
+                    "color": {
+                      "r": 254,
+                      "g": 217,
+                      "b": 118,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 19.75,
+                    "color": {
+                      "r": 254,
+                      "g": 178,
+                      "b": 76,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 26,
+                    "color": {
+                      "r": 253,
+                      "g": 141,
+                      "b": 60,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 32.25,
+                    "color": {
+                      "r": 252,
+                      "g": 78,
+                      "b": 42,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 38.5,
+                    "color": {
+                      "r": 227,
+                      "g": 26,
+                      "b": 28,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  },
+                  {
+                    "value": 44.75,
+                    "color": {
+                      "r": 177,
+                      "g": 0,
+                      "b": 38,
+                      "a": 0.7843137254901961
+                    },
+                    "label": null
+                  }
+                ]
+              }
+            ],
+            "type": "simple",
+            "label": "",
+            "description": "",
+            "symbol": {
+              "color": [
+                43,
+                140,
+                190,
+                200
+              ],
+              "outline": {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "width": 0.5,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              },
+              "type": "esriSFS",
+              "style": "esriSFSSolid"
+            },
+            "layerId": "6b25ff770436442d96f8e803fafdab46_0",
+            "defaultSymbol": {
+              "color": [
+                43,
+                140,
+                190,
+                200
+              ],
+              "outline": {
+                "color": [
+                  255,
+                  255,
+                  255,
+                  255
+                ],
+                "width": 0.5,
+                "type": "esriSLS",
+                "style": "esriSLSSolid"
+              },
+              "type": "esriSFS",
+              "style": "esriSFSSolid"
+            }
+          }
+
+
           var simpleJson = layer.renderer.toJson();
           simpleJson.symbol.color = [220,220,220,200];
           simpleJson.symbol.outline.width = 0.3;
           simpleJson.symbol.outline.color = [255,255,255,255];
 
-          var rend = new SimpleRenderer(simpleJson);
+          var rend = new SimpleRenderer(json);
           layer.setRenderer(rend);
           
           $.getJSON('http://opendata.arcgis.com/datasets/05afb060ab874b32b56b4e9cc6ad581e_2.json', function(res) {
             
             var fields = res.data.fields;
             malette = new Malette('esri-map', {
-              style: simpleJson,
+              style: json,
               formatIn: 'esri-json',
               formatOut: 'esri-json',
               fields: fields,
