@@ -30,19 +30,19 @@
     //can choropleth || graduate 
     this._hasApplicableFields = this._getApplicableFields();
 
+    //initialize the things 
     if ( this.format === 'esri-json' ) {
       if ( options.style ) {
         
         this.style = options.style || {};
-        console.log('this.style -----> SHOULD NOW HAVE DEFAULT SYMBOL', this.style);
+        
         if ( this.style.visualVariables ) {
           this._setRamp();
         }
         if ( !this.style.symbol && this.style.defaultSymbol ) {
           this.style.symbol = this.style.defaultSymbol;
         }
-        console.log('this.style.symbol...???...', this.style.symbol);
-
+        
         this.state.fillOpacity = this.style.symbol.color[3];
         this.style.symbol.color = this._dojoColorToRgba( this.style.symbol.color ); //helper for colors, etc\
 
@@ -72,12 +72,6 @@
 
   };
 
-
-
-  Malette.prototype.destroy = function() {
-    var parent = document.getElementById( this.container ); 
-    parent.removeChild( document.getElementById('malette') );
-  }
 
 
 
@@ -549,7 +543,6 @@
       }
     }
 
-    console.log('IS isApplicable', isApplicable);
     return isApplicable;
   }
 
@@ -602,7 +595,24 @@
   /************* METHODS **************/
 
 
+  /*
+  * Self distruct 
+  * Really only called from external resources 
+  *
+  */
+  Malette.prototype.destroy = function() {
+    var parent = document.getElementById( this.container ); 
+    parent.removeChild( document.getElementById('malette') );
+  }
 
+
+
+
+  /*
+  * Change tab
+  * 
+  *
+  */
   Malette.prototype.changeTab = function(tab) {
     var el = document.getElementById('malette-content');
 
@@ -632,6 +642,14 @@
   }
 
 
+
+
+  /*
+  * Classify function 
+  * Only thing supported right now is equal interval 
+  *
+  *
+  */
   Malette.prototype.classify = function(field){
 
     var fields = this.options.fields;
@@ -651,12 +669,20 @@
   };
 
 
+
+
+
+  /*
+  * Sets thematic styles 
+  * @param {Array} ramp     (optional) color ramp 
+  * @param {String} field     Field being styled 
+  *
+  */
   Malette.prototype.setTheme = function(ramp, field) {
     var self = this;
 
     this.state.selectedField = ( field ) ? field : this.state.selectedField; 
-    //console.log('this.state.selectedField', this.state.selectedField);
-
+    
     //default theme map 
     if ( !ramp && !this.selectedRamp ) {
       ramp = [[255,247,251, this.state.fillOpacity],[236,226,240, this.state.fillOpacity],
@@ -670,7 +696,6 @@
 
     //set opacity on ramp colors
     this.selectedRamp.forEach(function(color, i) {
-      console.log('self.state.fillOpacity', self.state.fillOpacity);
       self.selectedRamp[ i ][ 3 ] = self.state.fillOpacity;
     });
     
@@ -728,6 +753,14 @@
   }
 
 
+
+
+  /*
+  * Sets graduated styles 
+  * @param {String} field     Field being styled 
+  *
+  *
+  */
   Malette.prototype.setGraduated = function(field) {
     
     this.state.selectedField = ( field ) ? field : this.state.selectedField;
@@ -834,12 +867,25 @@
   }
 
 
+
+  /*
+  * Set to single, remove and destroy theme 
+  *
+  *
+  */
   Malette.prototype.clearTheme = function() {
     this.style.visualVariables = null;
     this.updateStyle();
   }
 
 
+
+
+  /*
+  *
+  * Clear graduated styles 
+  *
+  */
   Malette.prototype.clearGraduated = function() {
     this.style.type = "simple";
     this.style.field = null;
@@ -849,6 +895,12 @@
   }
 
 
+
+
+  /*
+  * Crazy UI handlers 
+  *
+  */
   Malette.prototype.showThemeUI = function() {
     document.getElementById('malette-theme-palette').style.display = 'block';
     document.getElementById('malette-color-palette').style.display = 'none';
@@ -910,6 +962,14 @@
   }
 
 
+
+
+
+  /*
+  * Logic for toggling the export type in the Export UI 
+  *
+  *
+  */
   Malette.prototype.changeExportType = function(e) {
 
     var checkbox = document.getElementsByClassName( 'export-type-toggle' );
@@ -930,6 +990,12 @@
   }
 
 
+
+  /*
+  * Sets the selected color 
+  *
+  *
+  */
   Malette.prototype.setSelectedColor = function(color) {
 
     this.style.symbol.color = color;
@@ -1157,9 +1223,6 @@
     type = type || this.selectedExportType; 
 
     if ( type === 'esri-json' ) {
-
-      //console.log('this.style.symbol.color', this.style.symbol.color);
-      //console.log('fillOpacity', this.state.fillOpacity);
 
       this.style.symbol.color = this._rgbaToDojoColor( this.style.symbol.color, this.state.fillOpacity ); //change colors BACK to dojo :(
 
