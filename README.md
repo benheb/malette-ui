@@ -1,6 +1,6 @@
 # Malette UI
 
-[http://benheb.github.io/mundi/](http://benheb.github.io/malette-ui/)
+[http://benheb.github.io/malette-ui/](http://benheb.github.io/malette-ui/)
 
 ****
 
